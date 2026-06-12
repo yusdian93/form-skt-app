@@ -1,0 +1,29 @@
+<script>
+      function submitData() {
+        var form = document.getElementById('sktForm');
+        var formData = new FormData(form);
+        var data = Object.fromEntries(formData.entries());
+        
+        document.getElementById('message').innerHTML = '<div class="alert alert-info">Memproses data...</div>';
+        
+        // GANTI URL DI BAWAH INI DENGAN URL WEB APP APPS SCRIPT ANDA
+        var scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec';
+
+        fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+          if(result.status === 'success') {
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">' + result.message + '</div>';
+            form.reset();
+          } else {
+            document.getElementById('message').innerHTML = '<div class="alert alert-danger">Error: ' + result.message + '</div>';
+          }
+        })
+        .catch(error => {
+          document.getElementById('message').innerHTML = '<div class="alert alert-danger">Koneksi Error. Coba lagi.</div>';
+        });
+      }
+    </script>
