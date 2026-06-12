@@ -243,7 +243,7 @@
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
   }
 
-  function saveToDraft() {
+function saveToDraft() {
     let data = {
       nomorSKT: $('#nomorSKT').val(),
       namaOrganisasi: $('#namaOrganisasi').val(),
@@ -254,7 +254,8 @@
       namaKetua: $('#namaKetua').val(),
       namaSekretaris: $('#namaSekretaris').val(),
       namaBendahara: $('#namaBendahara').val(),
-      tanggalPenerbitan: $('#tanggalPenerbitan').val()
+      tanggalPenerbitan: $('#tanggalPenerbitan').val(),
+      tercetak: false // Menambahkan status default belum tercetak
     };
 
     let editId = $('#editId').val();
@@ -262,6 +263,8 @@
     if (editId === "-1") {
       draftData.push(data);
     } else {
+      // Jika sedang mode edit, pertahankan status tercetaknya
+      data.tercetak = draftData[parseInt(editId)].tercetak; 
       draftData[parseInt(editId)] = data;
       $('#editId').val("-1");
     }
@@ -273,11 +276,17 @@
   function refreshTable() {
     table.clear();
     draftData.forEach((item, index) => {
+      
+      // Jika sudah tercetak, tombol berubah hijau. Jika belum, tombol biru.
+      let btnPrint = item.tercetak 
+        ? `<button class="btn btn-sm btn-success" onclick="generateSKT(${index})" title="Sudah Masuk Drive (Klik untuk cetak ulang)"><i class="fa-solid fa-check-double"></i></button>`
+        : `<button class="btn btn-sm btn-primary" onclick="generateSKT(${index})" title="Buat Dokumen SKT & Simpan Drive"><i class="fa-solid fa-paper-plane"></i></button>`;
+
       let actionBtns = `
         <div class="d-flex gap-1 justify-content-center">
             <button class="btn btn-sm btn-warning" onclick="editData(${index})" title="Edit"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus"><i class="fa-solid fa-trash"></i></button>
-            <button class="btn btn-sm btn-primary" onclick="generateSKT(${index})" title="Buat Dokumen SKT & Simpan Drive"><i class="fa-solid fa-paper-plane"></i></button>
+            ${btnPrint}
         </div>
       `;
       table.row.add([
@@ -324,11 +333,15 @@
   function generateSKT(index) {
     let targetData = draftData[index];
     
-    // GANTI URL INI DENGAN URL WEB APP MILIK ANDA SEBELUM DI-SAVE
+    // GANTI URL INI DENGAN URL WEB APP MILIK ANDA
     let scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
     
     let formData = new FormData();
-    for (let key in targetData) { formData.append(key, targetData[key]); }
+    for (let key in targetData) { 
+        if (key !== 'tercetak') { // Jangan kirim status tercetak ke Google Sheets
+            formData.append(key, targetData[key]); 
+        }
+    }
 
     var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
     $('#loadingPdf').removeClass('d-none');
@@ -350,8 +363,13 @@
           $('#iframeContainer').removeClass('d-none');
           $('#modalFooterBtns').removeClass('d-none');
           
-          draftData.splice(index, 1);
+          // KODE YANG DIHAPUS: draftData.splice(index, 1); 
+          // (Data tidak lagi dihapus dari tabel)
+          
+          // KODE BARU: Tandai data berhasil diproses
+          draftData[index].tercetak = true; 
           refreshTable();
+
         } else {
           alert('Error: ' + result.message);
           pdfModal.hide();
