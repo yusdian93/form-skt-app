@@ -60,6 +60,11 @@
     table.dataTable thead {
       background-color: #1e3c72;
       color: white;
+      white-space: nowrap; /* Mencegah judul kolom terpotong */
+    }
+    table.dataTable tbody td {
+      vertical-align: middle;
+      white-space: nowrap; /* Teks tidak bertumpuk */
     }
     .iframe-container {
       position: relative;
@@ -73,14 +78,14 @@
 </head>
 <body>
 
-<div class="container py-5">
+<div class="container-fluid px-4 py-5">
   
   <div class="text-center mb-5">
     <h1 class="gradient-text"><i class="fa-solid fa-file-signature"></i> Aplikasi Input SKT Terintegrasi</h1>
     <p class="text-muted">Manajemen Data dan Auto-Generate Surat Keterangan Terdaftar</p>
   </div>
 
-  <div class="glass-card">
+  <div class="glass-card mx-auto" style="max-width: 1000px;">
     <h4 class="mb-4"><i class="fa-solid fa-pen-to-square"></i> Form Input Data</h4>
     <form id="sktForm" onsubmit="event.preventDefault(); saveToDraft();">
       <input type="hidden" id="editId" value="-1">
@@ -147,11 +152,17 @@
         <thead>
           <tr>
             <th>No</th>
-            <th>Organisasi</th>
-            <th>No. SKT</th>
-            <th>Periode</th>
-            <th>Ketua</th>
-            <th>Aksi (Validasi & Print)</th>
+            <th>Nama Organisasi</th>
+            <th>Tanggal Pengajuan</th>
+            <th>Tanggal Berdiri</th>
+            <th>Alamat Sekretariat</th>
+            <th>Kepengurusan / Periode</th>
+            <th>Nama Ketua</th>
+            <th>Nama Sekretaris</th>
+            <th>Nama Bendahara</th>
+            <th>Nomor SKT</th>
+            <th>Tanggal Penerbitan SKT</th>
+            <th class="text-center">Aksi (Validasi & Print)</th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -204,19 +215,19 @@
   let table;
 
   $(document).ready(function() {
-    // Inisialisasi DataTables dengan tombol Export
+    // Menambahkan scrollX agar tabel luas tidak merusak layar
     table = $('#rekapTable').DataTable({
       dom: 'Bfrtip',
+      scrollX: true, 
       buttons: [
         { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel' },
-        { extend: 'pdfHtml5', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF' },
+        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF' },
         { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel' }
       ],
       language: { search: "Cari Data:" }
     });
   });
 
-  // Fungsi menyimpan data dari form ke dalam draf tabel lokal
   function saveToDraft() {
     let data = {
       nomorSKT: $('#nomorSKT').val(),
@@ -234,9 +245,9 @@
     let editId = $('#editId').val();
 
     if (editId === "-1") {
-      draftData.push(data); // Tambah data baru
+      draftData.push(data);
     } else {
-      draftData[parseInt(editId)] = data; // Update data yang diedit
+      draftData[parseInt(editId)] = data;
       $('#editId').val("-1");
     }
 
@@ -244,28 +255,36 @@
     refreshTable();
   }
 
-  // Refresh isi tabel Rekap
   function refreshTable() {
     table.clear();
     draftData.forEach((item, index) => {
+      // Tombol aksi ditata agar rapi
       let actionBtns = `
-        <button class="btn btn-sm btn-warning mb-1" onclick="editData(${index})" title="Edit"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-sm btn-danger mb-1" onclick="deleteData(${index})" title="Hapus"><i class="fa-solid fa-trash"></i></button>
-        <button class="btn btn-sm btn-primary mb-1" onclick="generateSKT(${index})" title="Kirim & Cetak SKT"><i class="fa-solid fa-paper-plane"></i> Buat Dokumen</button>
+        <div class="d-flex gap-1 justify-content-center">
+            <button class="btn btn-sm btn-warning" onclick="editData(${index})" title="Edit"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn btn-sm btn-primary" onclick="generateSKT(${index})" title="Buat Dokumen SKT & Simpan Drive"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
       `;
+      // Urutan array ini adalah yang masuk ke dalam urutan kolom tabel
       table.row.add([
         index + 1,
         item.namaOrganisasi,
-        item.nomorSKT,
+        item.tanggalPengajuan,
+        item.tanggalBerdiri,
+        item.alamatSekretariat,
         item.periode,
         item.namaKetua,
+        item.namaSekretaris,
+        item.namaBendahara,
+        item.nomorSKT,
+        item.tanggalPenerbitan,
         actionBtns
       ]);
     });
     table.draw();
   }
 
-  // Tarik data kembali ke form untuk diedit
   function editData(index) {
     let data = draftData[index];
     $('#nomorSKT').val(data.nomorSKT);
@@ -289,17 +308,15 @@
     }
   }
 
-  // Mengirim data ke Google Apps Script dan memunculkan Preview PDF
   function generateSKT(index) {
     let targetData = draftData[index];
     
-    // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA YANG BARU DISINI
+    // GANTI URL INI DENGAN URL WEB APP MILIK ANDA
     let scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
     
     let formData = new FormData();
     for (let key in targetData) { formData.append(key, targetData[key]); }
 
-    // Buka Modal Loading
     var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
     $('#loadingPdf').removeClass('d-none');
     $('#iframeContainer').addClass('d-none');
@@ -310,18 +327,16 @@
       .then(response => response.json())
       .then(result => {
         if (result.result === 'success') {
-          // Ubah link view menjadi preview agar bisa masuk ke dalam iframe
           let previewLink = result.pdfUrl.replace(/\/view.*/, '/preview');
           
           $('#pdfFrame').attr('src', previewLink);
           $('#btnDownload').attr('href', result.downloadUrl);
-          $('#btnPrint').attr('href', result.pdfUrl); // Buka tab baru untuk diprint
+          $('#btnPrint').attr('href', result.pdfUrl);
           
           $('#loadingPdf').addClass('d-none');
           $('#iframeContainer').removeClass('d-none');
           $('#modalFooterBtns').removeClass('d-none');
           
-          // Opsional: Hapus data dari draf setelah berhasil terkirim
           draftData.splice(index, 1);
           refreshTable();
         } else {
