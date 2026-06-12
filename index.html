@@ -224,9 +224,19 @@
   let draftData = [];
   let table;
 
+  // FUNGSI BARU: Menyimpan data secara permanen ke memori browser
+  function updateLocalStorage() {
+    localStorage.setItem('sktDraftData', JSON.stringify(draftData));
+  }
+
   $(document).ready(function() {
     
-    // Fungsi untuk membuat judul yang bersih dan dinamis menyesuaikan input tahun
+    // FUNGSI BARU: Memanggil kembali data yang tersimpan saat web dibuka
+    let savedData = localStorage.getItem('sktDraftData');
+    if (savedData) {
+      draftData = JSON.parse(savedData);
+    }
+
     function getJudulSKT() {
       let tahun = document.getElementById('inputTahunGlobal').value || ".....";
       return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
@@ -240,8 +250,8 @@
           extend: 'excelHtml5', 
           className: 'btn btn-success btn-sm', 
           text: '<i class="fa-solid fa-file-excel"></i> Export Excel',
-          title: getJudulSKT,    // Judul di dalam file Excel
-          filename: getJudulSKT, // Nama file Excel saat diunduh
+          title: getJudulSKT,
+          filename: getJudulSKT,
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
         },
         { 
@@ -250,11 +260,10 @@
           pageSize: 'LEGAL', 
           className: 'btn btn-danger btn-sm', 
           text: '<i class="fa-solid fa-file-pdf"></i> Export PDF',
-          title: getJudulSKT,    // Judul di dalam dokumen PDF
-          filename: getJudulSKT, // Nama file PDF saat diunduh
+          title: getJudulSKT,
+          filename: getJudulSKT,
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
           customize: function (doc) {
-            // Merapikan judul PDF agar letaknya pas di tengah dan tebal
             doc.content[0].text = getJudulSKT();
             doc.content[0].alignment = 'center';
             doc.content[0].fontSize = 14;
@@ -266,9 +275,8 @@
           extend: 'print', 
           className: 'btn btn-secondary btn-sm', 
           text: '<i class="fa-solid fa-print"></i> Print Tabel',
-          title: '', // Dikosongkan secara paksa agar browser tidak mencetak judul ganda yang kecil
+          title: '',
           messageTop: function() {
-            // Menggunakan messageTop untuk menyisipkan judul besar yang rapi
             return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>';
           },
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
@@ -276,15 +284,17 @@
       ],
       language: { search: "Cari Data:" }
     });
+
+    // FUNGSI BARU: Langsung tampilkan data ke tabel sesaat setelah web selesai dimuat
+    refreshTable();
   });
 
-  // FUNGSI BARU: Mengubah angka tahun di judul tabel secara real-time
   function updateTahun() {
     let tahun = document.getElementById('inputTahunGlobal').value;
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
   }
 
-function saveToDraft() {
+  function saveToDraft() {
     let data = {
       nomorSKT: $('#nomorSKT').val(),
       namaOrganisasi: $('#namaOrganisasi').val(),
@@ -296,7 +306,7 @@ function saveToDraft() {
       namaSekretaris: $('#namaSekretaris').val(),
       namaBendahara: $('#namaBendahara').val(),
       tanggalPenerbitan: $('#tanggalPenerbitan').val(),
-      tercetak: false // Menambahkan status default belum tercetak
+      tercetak: false // Status default belum tercetak
     };
 
     let editId = $('#editId').val();
@@ -304,13 +314,15 @@ function saveToDraft() {
     if (editId === "-1") {
       draftData.push(data);
     } else {
-      // Jika sedang mode edit, pertahankan status tercetaknya
       data.tercetak = draftData[parseInt(editId)].tercetak; 
       draftData[parseInt(editId)] = data;
       $('#editId').val("-1");
     }
 
     $('#sktForm')[0].reset();
+    
+    // Simpan perubahan ke memori browser setiap kali ada input baru
+    updateLocalStorage(); 
     refreshTable();
   }
 
@@ -318,7 +330,6 @@ function saveToDraft() {
     table.clear();
     draftData.forEach((item, index) => {
       
-      // Jika sudah tercetak, tombol berubah hijau. Jika belum, tombol biru.
       let btnPrint = item.tercetak 
         ? `<button class="btn btn-sm btn-success" onclick="generateSKT(${index})" title="Sudah Masuk Drive (Klik untuk cetak ulang)"><i class="fa-solid fa-check-double"></i></button>`
         : `<button class="btn btn-sm btn-primary" onclick="generateSKT(${index})" title="Buat Dokumen SKT & Simpan Drive"><i class="fa-solid fa-paper-plane"></i></button>`;
@@ -365,8 +376,11 @@ function saveToDraft() {
   }
 
   function deleteData(index) {
-    if(confirm('Yakin ingin menghapus draf ini?')) {
+    if(confirm('Yakin ingin menghapus data ini dari rekap?')) {
       draftData.splice(index, 1);
+      
+      // Update memori browser saat data dihapus
+      updateLocalStorage(); 
       refreshTable();
     }
   }
@@ -374,12 +388,12 @@ function saveToDraft() {
   function generateSKT(index) {
     let targetData = draftData[index];
     
-    // GANTI URL INI DENGAN URL WEB APP MILIK ANDA
-    let scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
+    // PASTIKAN URL API ANDA SUDAH TERPASANG DI SINI
+    let scriptURL = 'MASUKKAN_URL_WEB_APP_DARI_LANGKAH_1_DI_SINI'; 
     
     let formData = new FormData();
     for (let key in targetData) { 
-        if (key !== 'tercetak') { // Jangan kirim status tercetak ke Google Sheets
+        if (key !== 'tercetak') {
             formData.append(key, targetData[key]); 
         }
     }
@@ -404,11 +418,9 @@ function saveToDraft() {
           $('#iframeContainer').removeClass('d-none');
           $('#modalFooterBtns').removeClass('d-none');
           
-          // KODE YANG DIHAPUS: draftData.splice(index, 1); 
-          // (Data tidak lagi dihapus dari tabel)
-          
-          // KODE BARU: Tandai data berhasil diproses
+          // Tandai sukses dan simpan status hijaunya ke memori browser
           draftData[index].tercetak = true; 
+          updateLocalStorage();
           refreshTable();
 
         } else {
