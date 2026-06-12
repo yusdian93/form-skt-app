@@ -232,20 +232,49 @@
 <script>
   let draftData = [];
   let table;
+  
+  // 1. PINDAHKAN URL API GOOGLE ANDA KE SINI AGAR BISA DIPAKAI BERSAMA
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
 
-  // FUNGSI BARU: Menyimpan data secara permanen ke memori browser
   function updateLocalStorage() {
     localStorage.setItem('sktDraftData', JSON.stringify(draftData));
   }
 
-  $(document).ready(function() {
-    
-    // FUNGSI BARU: Memanggil kembali data yang tersimpan saat web dibuka
-    let savedData = localStorage.getItem('sktDraftData');
-    if (savedData) {
-      draftData = JSON.parse(savedData);
-    }
+  // Fungsi untuk menarik data langsung dari Google Sheets
+  function loadDataFromGoogle() {
+    $('#tableBody').html('<tr><td colspan="12" class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 fw-bold text-muted">Sinkronisasi Database Live dari Google Sheets...</p></td></tr>');
 
+    fetch(scriptURL + '?action=getData')
+      .then(response => response.json())
+      .then(result => {
+        if (result.result === 'success') {
+          let fetchedData = result.data;
+          
+          // Ambil draf lokal (Local Storage) yang BELUM dicetak/dikirim ke Drive
+          let savedData = localStorage.getItem('sktDraftData');
+          let localDrafts = savedData ? JSON.parse(savedData) : [];
+          let unprintedDrafts = localDrafts.filter(item => item.tercetak === false);
+          
+          // Gabungkan Data Google Sheets (permanen) dengan Draf Lokal perangkat ini
+          draftData = fetchedData.concat(unprintedDrafts);
+          
+          updateLocalStorage();
+          refreshTable();
+        } else {
+          alert('Gagal mengambil data Live: ' + result.message);
+          refreshTable(); // Jika error, minimal tampilkan tabel kosong/lokal
+        }
+      })
+      .catch(error => {
+        console.error('Koneksi Error:', error);
+        // Jika sedang offline/koneksi buruk, panggil data lokal terakhir
+        let savedData = localStorage.getItem('sktDraftData');
+        if (savedData) draftData = JSON.parse(savedData);
+        refreshTable();
+      });
+  }
+
+  $(document).ready(function() {
     function getJudulSKT() {
       let tahun = document.getElementById('inputTahunGlobal').value || ".....";
       return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
@@ -256,21 +285,16 @@
       scrollX: true, 
       buttons: [
         { 
-          extend: 'excelHtml5', 
-          className: 'btn btn-success btn-sm', 
+          extend: 'excelHtml5', className: 'btn btn-success btn-sm', 
           text: '<i class="fa-solid fa-file-excel"></i> Export Excel',
-          title: getJudulSKT,
-          filename: getJudulSKT,
+          title: getJudulSKT, filename: getJudulSKT,
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
         },
         { 
-          extend: 'pdfHtml5', 
-          orientation: 'landscape', 
-          pageSize: 'LEGAL', 
+          extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', 
           className: 'btn btn-danger btn-sm', 
           text: '<i class="fa-solid fa-file-pdf"></i> Export PDF',
-          title: getJudulSKT,
-          filename: getJudulSKT,
+          title: getJudulSKT, filename: getJudulSKT,
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
           customize: function (doc) {
             doc.content[0].text = getJudulSKT();
@@ -281,8 +305,7 @@
           }
         },
         { 
-          extend: 'print', 
-          className: 'btn btn-secondary btn-sm', 
+          extend: 'print', className: 'btn btn-secondary btn-sm', 
           text: '<i class="fa-solid fa-print"></i> Print Tabel',
           title: '',
           messageTop: function() {
@@ -291,11 +314,11 @@
           exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
         }
       ],
-      language: { search: "Cari Data:" }
+      language: { search: "Cari Data:", zeroRecords: "Data tidak ditemukan atau sedang memuat..." }
     });
 
-    // FUNGSI BARU: Langsung tampilkan data ke tabel sesaat setelah web selesai dimuat
-    refreshTable();
+    // Panggil fungsi sinkronisasi Google Sheets saat pertama kali buka web
+    loadDataFromGoogle();
   });
 
   function updateTahun() {
@@ -315,7 +338,7 @@
       namaSekretaris: $('#namaSekretaris').val(),
       namaBendahara: $('#namaBendahara').val(),
       tanggalPenerbitan: $('#tanggalPenerbitan').val(),
-      tercetak: false // Status default belum tercetak
+      tercetak: false // Draf baru selalu berstatus belum tercetak (Biru)
     };
 
     let editId = $('#editId').val();
@@ -329,8 +352,6 @@
     }
 
     $('#sktForm')[0].reset();
-    
-    // Simpan perubahan ke memori browser setiap kali ada input baru
     updateLocalStorage(); 
     refreshTable();
   }
@@ -346,7 +367,7 @@
       let actionBtns = `
         <div class="d-flex gap-1 justify-content-center">
             <button class="btn btn-sm btn-warning" onclick="editData(${index})" title="Edit"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus Draf"><i class="fa-solid fa-trash"></i></button>
             ${btnPrint}
         </div>
       `;
@@ -385,10 +406,8 @@
   }
 
   function deleteData(index) {
-    if(confirm('Yakin ingin menghapus data ini dari rekap?')) {
+    if(confirm('Yakin ingin menghapus data ini dari rekap layar? (Data di Google Sheets harus dihapus manual)')) {
       draftData.splice(index, 1);
-      
-      // Update memori browser saat data dihapus
       updateLocalStorage(); 
       refreshTable();
     }
@@ -396,15 +415,9 @@
 
   function generateSKT(index) {
     let targetData = draftData[index];
-    
-    // PASTIKAN URL API ANDA SUDAH TERPASANG DI SINI
-    let scriptURL = 'MASUKKAN_URL_WEB_APP_DARI_LANGKAH_1_DI_SINI'; 
-    
     let formData = new FormData();
     for (let key in targetData) { 
-        if (key !== 'tercetak') {
-            formData.append(key, targetData[key]); 
-        }
+        if (key !== 'tercetak') formData.append(key, targetData[key]); 
     }
 
     var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
@@ -418,7 +431,6 @@
       .then(result => {
         if (result.result === 'success') {
           let previewLink = result.pdfUrl.replace(/\/view.*/, '/preview');
-          
           $('#pdfFrame').attr('src', previewLink);
           $('#btnDownload').attr('href', result.downloadUrl);
           $('#btnPrint').attr('href', result.pdfUrl);
@@ -427,11 +439,9 @@
           $('#iframeContainer').removeClass('d-none');
           $('#modalFooterBtns').removeClass('d-none');
           
-          // Tandai sukses dan simpan status hijaunya ke memori browser
           draftData[index].tercetak = true; 
           updateLocalStorage();
           refreshTable();
-
         } else {
           alert('Error: ' + result.message);
           pdfModal.hide();
