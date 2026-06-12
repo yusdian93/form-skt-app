@@ -225,6 +225,13 @@
   let table;
 
   $(document).ready(function() {
+    
+    // Fungsi untuk membuat judul yang bersih dan dinamis menyesuaikan input tahun
+    function getJudulSKT() {
+      let tahun = document.getElementById('inputTahunGlobal').value || ".....";
+      return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
+    }
+
     table = $('#rekapTable').DataTable({
       dom: 'Bfrtip',
       scrollX: true, 
@@ -233,13 +240,9 @@
           extend: 'excelHtml5', 
           className: 'btn btn-success btn-sm', 
           text: '<i class="fa-solid fa-file-excel"></i> Export Excel',
-          title: function() {
-            let tahun = document.getElementById('inputTahunGlobal').value || ".....";
-            return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
-          },
-          exportOptions: {
-            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] 
-          }
+          title: getJudulSKT,    // Judul di dalam file Excel
+          filename: getJudulSKT, // Nama file Excel saat diunduh
+          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
         },
         { 
           extend: 'pdfHtml5', 
@@ -247,25 +250,28 @@
           pageSize: 'LEGAL', 
           className: 'btn btn-danger btn-sm', 
           text: '<i class="fa-solid fa-file-pdf"></i> Export PDF',
-          title: function() {
-            let tahun = document.getElementById('inputTahunGlobal').value || ".....";
-            return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
-          },
-          exportOptions: {
-            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          title: getJudulSKT,    // Judul di dalam dokumen PDF
+          filename: getJudulSKT, // Nama file PDF saat diunduh
+          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+          customize: function (doc) {
+            // Merapikan judul PDF agar letaknya pas di tengah dan tebal
+            doc.content[0].text = getJudulSKT();
+            doc.content[0].alignment = 'center';
+            doc.content[0].fontSize = 14;
+            doc.content[0].bold = true;
+            doc.content[0].margin = [0, 0, 0, 15]; 
           }
         },
         { 
           extend: 'print', 
           className: 'btn btn-secondary btn-sm', 
           text: '<i class="fa-solid fa-print"></i> Print Tabel',
-          title: function() {
-            let tahun = document.getElementById('inputTahunGlobal').value || ".....";
-            return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
+          title: '', // Dikosongkan secara paksa agar browser tidak mencetak judul ganda yang kecil
+          messageTop: function() {
+            // Menggunakan messageTop untuk menyisipkan judul besar yang rapi
+            return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>';
           },
-          exportOptions: {
-            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-          }
+          exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
         }
       ],
       language: { search: "Cari Data:" }
