@@ -86,7 +86,11 @@
       <div class="row">
         <div class="col-md-4 mb-3">
           <label class="form-label text-muted small fw-bold">Nomor SKT</label>
-          <input type="text" class="form-control" id="nomorSKT" required>
+          <div class="input-group shadow-sm">
+            <span class="input-group-text fw-bold bg-light">400.4 /</span>
+            <input type="text" class="form-control text-center fw-bold text-primary" id="nomorSKT" placeholder="133" required>
+            <span class="input-group-text fw-bold bg-light">/ 54.03 / <span id="addonTahun">2024</span></span>
+          </div>
         </div>
         <div class="col-md-8 mb-3">
           <label class="form-label text-muted small fw-bold">Nama Organisasi</label>
@@ -235,6 +239,7 @@
   function updateTahun() {
     let tahun = document.getElementById('inputTahunGlobal').value;
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
+    document.getElementById('addonTahun').innerText = tahun ? tahun : "....."; // Menambahkan tahun ke kotak Nomor SKT
   }
 
   // FUNGSI TARIK DATA DARI SERVER
@@ -266,7 +271,11 @@
     }
     
     // Tarik semua isian form
-    formData.append('nomorSKT', $('#nomorSKT').val());
+    // Tarik dan gabungkan Nomor SKT secara utuh
+    let noTengah = $('#nomorSKT').val();
+    let tahun = $('#inputTahunGlobal').val() || "2024";
+    let fullSKT = `400.4 / ${noTengah} / 54.03 / ${tahun}`;
+    formData.append('nomorSKT', fullSKT);
     formData.append('namaOrganisasi', $('#namaOrganisasi').val());
     formData.append('tanggalPengajuan', $('#tanggalPengajuan').val());
     formData.append('tanggalBerdiri', $('#tanggalBerdiri').val());
@@ -316,7 +325,14 @@
 
   function editData(index) {
     let d = cloudData[index];
-    $('#nomorSKT').val(d.nomorSKT); $('#namaOrganisasi').val(d.namaOrganisasi);
+    // Memecah format nomor SKT untuk mengambil angka tengahnya saja saat mode Edit
+    let noTengah = d.nomorSKT;
+    if (noTengah.includes('/')) {
+        let parts = noTengah.split('/');
+        if (parts.length > 1) noTengah = parts[1].trim(); 
+    }
+    $('#nomorSKT').val(noTengah); 
+    $('#namaOrganisasi').val(d.namaOrganisasi);
     $('#tanggalPengajuan').val(d.tanggalPengajuan); $('#tanggalBerdiri').val(d.tanggalBerdiri);
     $('#alamatSekretariat').val(d.alamatSekretariat); $('#periode').val(d.periode);
     $('#namaKetua').val(d.namaKetua); $('#namaSekretaris').val(d.namaSekretaris);
