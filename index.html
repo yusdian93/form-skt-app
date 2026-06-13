@@ -12,39 +12,11 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-      min-height: 100vh;
-      color: #333;
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-      padding: 30px;
-      margin-bottom: 30px;
-    }
-    .gradient-text {
-      background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 800;
-    }
-    .form-control {
-      border-radius: 10px;
-      border: 1px solid #ced4da;
-    }
-    .btn-ai {
-      background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-      border: none;
-      color: white;
-      border-radius: 10px;
-      font-weight: 600;
-      transition: transform 0.2s;
-    }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); min-height: 100vh; color: #333; }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); padding: 30px; margin-bottom: 30px; }
+    .gradient-text { background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+    .form-control, .form-select { border-radius: 10px; border: 1px solid #ced4da; }
+    .btn-ai { background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); border: none; color: white; border-radius: 10px; font-weight: 600; transition: transform 0.2s; }
     .btn-ai:hover { transform: translateY(-2px); color: white; }
     table.dataTable thead { background-color: #1e3c72; color: white; white-space: nowrap; }
     table.dataTable tbody td { vertical-align: middle; white-space: nowrap; }
@@ -56,13 +28,8 @@
 <div class="container-fluid px-4 py-5">
   
   <div class="text-center mb-5">
-    <h1 class="text-dark fw-bolder text-uppercase mb-1" style="letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-      Dinas Pemuda dan Olahraga
-    </h1>
-    <h2 class="text-secondary fw-bold text-uppercase mb-4" style="letter-spacing: 1px;">
-      Kabupaten Tulungagung
-    </h2>
-    
+    <h1 class="text-dark fw-bolder text-uppercase mb-1" style="letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Dinas Pemuda dan Olahraga</h1>
+    <h2 class="text-secondary fw-bold text-uppercase mb-4" style="letter-spacing: 1px;">Kabupaten Tulungagung</h2>
     <div class="d-inline-block px-4 py-2 rounded-pill shadow-sm" style="background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.8);">
       <h4 class="gradient-text m-0"><i class="fa-solid fa-file-signature"></i> Aplikasi Input SKT Terintegrasi</h4>
       <p class="text-muted small m-0 mt-1">Sistem Database Terpusat Real-Time</p>
@@ -84,7 +51,7 @@
       <input type="hidden" id="editId" value="-1">
       
       <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-5 mb-3">
           <label class="form-label text-muted small fw-bold">Nomor SKT</label>
           <div class="input-group shadow-sm">
             <span class="input-group-text fw-bold bg-light">400.4 /</span>
@@ -92,7 +59,7 @@
             <span class="input-group-text fw-bold bg-light">/ 54.03 / <span id="addonTahun">2024</span></span>
           </div>
         </div>
-        <div class="col-md-8 mb-3">
+        <div class="col-md-7 mb-3">
           <label class="form-label text-muted small fw-bold">Nama Organisasi</label>
           <input type="text" class="form-control" id="namaOrganisasi" required>
         </div>
@@ -100,24 +67,26 @@
 
       <div class="row">
         <div class="col-md-6 mb-3">
+          <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Surat Permohonan)</label>
+          <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
+        </div>
+        <div class="col-md-6 mb-3">
           <label class="form-label text-muted small fw-bold">Tanggal Pengajuan</label>
           <input type="text" class="form-control" id="tanggalPengajuan" placeholder="Misal: 13 Maret 2024" required>
         </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label text-muted small fw-bold">Tanggal Berdiri</label>
-          <input type="text" class="form-control" id="tanggalBerdiri" placeholder="Misal: 7 Maret 2024" required>
-        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Alamat Sekretariat</label>
-        <textarea class="form-control" id="alamatSekretariat" rows="2" required></textarea>
+      <div class="row">
+        <div class="col-md-12 mb-3">
+          <label class="form-label text-muted small fw-bold">Alamat Sekretariat</label>
+          <textarea class="form-control" id="alamatSekretariat" rows="2" required></textarea>
+        </div>
       </div>
 
       <div class="row">
         <div class="col-md-3 mb-3">
-          <label class="form-label text-muted small fw-bold">Periode</label>
-          <input type="text" class="form-control" id="periode" placeholder="2024 s/d 2029" required>
+          <label class="form-label text-muted small fw-bold">Tanggal Berdiri</label>
+          <input type="text" class="form-control" id="tanggalBerdiri" placeholder="Misal: 7 Maret 2024" required>
         </div>
         <div class="col-md-3 mb-3">
           <label class="form-label text-muted small fw-bold">Nama Ketua</label>
@@ -133,20 +102,41 @@
         </div>
       </div>
 
-      <div class="mb-4">
-        <label class="form-label text-muted small fw-bold">Tanggal Penerbitan SKT</label>
-        <input type="text" class="form-control" id="tanggalPenerbitan" placeholder="Misal: 7 Maret 2024" required>
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <label class="form-label text-muted small fw-bold">Kepengurusan / Periode</label>
+          <input type="text" class="form-control" id="periode" placeholder="Misal: 2024 s/d 2029" required>
+        </div>
+        <div class="col-md-6 mb-4">
+          <label class="form-label text-muted small fw-bold">Tanggal Penerbitan SKT</label>
+          <input type="text" class="form-control" id="tanggalPenerbitan" placeholder="Misal: 7 Maret 2024" required>
+        </div>
       </div>
 
-      <button type="submit" id="btnSubmit" class="btn btn-ai w-100 py-3 fs-5"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server</button>
+      <hr class="mb-4">
+      <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-user-tie"></i> Penanda Tangan SKT (Kepala Dinas)</h6>
+      <div class="row mb-4">
+        <div class="col-md-5 mb-3">
+          <label class="form-label text-muted small fw-bold">Nama Kepala Dinas</label>
+          <input type="text" class="form-control bg-light" id="namaKadis" value="ACHMAD MUGIYONO, S.STP., MM." required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label text-muted small fw-bold">Golongan</label>
+          <input type="text" class="form-control bg-light" id="golonganKadis" value="Pembina" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label text-muted small fw-bold">NIP</label>
+          <input type="text" class="form-control bg-light" id="nipKadis" value="19830415 200212 1 002" required>
+        </div>
+      </div>
+
+      <button type="submit" id="btnSubmit" class="btn btn-ai w-100 py-3 fs-5"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server Google Sheets</button>
     </form>
   </div>
 
   <div class="glass-card">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-      <h4 class="m-0">
-        <i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span>
-      </h4>
+      <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
       <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
         <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-filter text-primary"></i>&nbsp; Filter Tahun:</span>
         <select id="filterTahunDatabase" class="form-select fw-bold text-dark" onchange="applyFilterDatabase()">
@@ -154,14 +144,13 @@
         </select>
       </div>
     </div>
-    
     <div class="table-responsive">
-
       <table id="rekapTable" class="table table-hover table-bordered w-100 align-middle">
         <thead>
           <tr>
             <th>No</th>
             <th>Nama Organisasi</th>
+            <th>Nomor Pengajuan</th>
             <th>Tanggal Pengajuan</th>
             <th>Tanggal Berdiri</th>
             <th>Alamat Sekretariat</th>
@@ -174,8 +163,7 @@
             <th class="text-center">Aksi Server</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
@@ -190,13 +178,8 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text-center">
-        <div id="loadingPdf" class="py-5">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="mt-3 fw-bold">Sedang memproses dokumen dengan AI ke Google Drive...</p>
-        </div>
-        <div class="iframe-container d-none" id="iframeContainer">
-          <iframe id="pdfFrame" src="" width="100%" height="100%" frameborder="0"></iframe>
-        </div>
+        <div id="loadingPdf" class="py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 fw-bold">Sedang memproses dokumen dengan AI ke Google Drive...</p></div>
+        <div class="iframe-container d-none" id="iframeContainer"><iframe id="pdfFrame" src="" width="100%" height="100%" frameborder="0"></iframe></div>
       </div>
       <div class="modal-footer border-0 justify-content-center d-none" id="modalFooterBtns">
         <a id="btnDownload" href="#" target="_blank" class="btn btn-success px-4"><i class="fa-solid fa-download"></i> Unduh PDF</a>
@@ -222,7 +205,7 @@
   let cloudData = [];
   let table;
   
-  // MASUKKAN URL API GOOGLE ANDA DI SINI
+  // MASUKKAN URL API GOOGLE ANDA DI SINI (YANG BARU)
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
 
   $(document).ready(function() {
@@ -235,39 +218,57 @@
       dom: 'Bfrtip',
       scrollX: true, 
       buttons: [
-        { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] } },
-        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }, customize: function(doc){ doc.content[0].text = getJudulSKT(); doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14; doc.content[0].bold = true; doc.content[0].margin = [0, 0, 0, 15]; } },
-        { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel', title: '', messageTop: function() { return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; }, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] } }
+        { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] } },
+        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }, customize: function(doc){ doc.content[0].text = getJudulSKT(); doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14; doc.content[0].bold = true; doc.content[0].margin = [0, 0, 0, 15]; } },
+        { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel', title: '', messageTop: function() { return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; }, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] } }
       ],
       language: { search: "Cari Data:", zeroRecords: "Data tidak ditemukan atau sedang disinkronkan..." }
     });
-
-    // Otomatis tarik data saat web dibuka
     syncWithServer();
   });
+
+  function extractYearsForFilter(data) {
+    let years = new Set();
+    data.forEach(item => {
+      let noSkt = item.nomorSKT || "";
+      if (noSkt.includes('/')) {
+        let parts = noSkt.split('/');
+        let yearPart = parts[parts.length - 1].trim();
+        if(yearPart.length === 4 && !isNaN(yearPart)) years.add(yearPart);
+      }
+    });
+    let filterSelect = $('#filterTahunDatabase');
+    filterSelect.empty();
+    filterSelect.append('<option value="">Semua Data</option>');
+    let sortedYears = Array.from(years).sort((a,b) => b - a);
+    sortedYears.forEach(year => filterSelect.append(`<option value="${year}">Tahun ${year}</option>`));
+  }
+
+  function applyFilterDatabase() {
+    let selectedYear = $('#filterTahunDatabase').val();
+    // Bergeser ke index 10 karena kolom baru (Nomor Pengajuan masuk di index 2)
+    table.column(10).search(selectedYear).draw(); 
+  }
 
   function updateTahun() {
     let tahun = document.getElementById('inputTahunGlobal').value;
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
-    document.getElementById('addonTahun').innerText = tahun ? tahun : "....."; // Menambahkan tahun ke kotak Nomor SKT
+    document.getElementById('addonTahun').innerText = tahun ? tahun : ".....";
   }
 
-  // FUNGSI TARIK DATA DARI SERVER
   function syncWithServer() {
-    $('#tableBody').html('<tr><td colspan="12" class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2 fw-bold text-muted">Menyinkronkan Database Waktu Nyata...</p></td></tr>');
-    
+    $('#tableBody').html('<tr><td colspan="13" class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2 fw-bold text-muted">Menyinkronkan Database Waktu Nyata...</p></td></tr>');
     fetch(scriptURL + '?action=getData')
       .then(res => res.json())
       .then(result => {
         if (result.result === 'success') {
           cloudData = result.data;
-          extractYearsForFilter(cloudData); // Baris baru: Membaca tahun dari database
+          extractYearsForFilter(cloudData);
           renderTable();
         }
       });
   }
 
-  // FUNGSI SIMPAN/EDIT DATA KE SERVER
   function saveToServer() {
     let btn = document.getElementById('btnSubmit');
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sedang Menyimpan ke Server...';
@@ -277,17 +278,15 @@
     let isEditMode = $('#editId').val() !== "-1";
     
     formData.append('action', isEditMode ? 'editData' : 'simpanData');
-    if (isEditMode) {
-      formData.append('rowId', cloudData[$('#editId').val()].rowId);
-    }
+    if (isEditMode) formData.append('rowId', cloudData[$('#editId').val()].rowId);
     
-    // Tarik semua isian form
-    // Tarik dan gabungkan Nomor SKT secara utuh
     let noTengah = $('#nomorSKT').val();
     let tahun = $('#inputTahunGlobal').val() || "2024";
     let fullSKT = `400.4 / ${noTengah} / 54.03 / ${tahun}`;
+    
     formData.append('nomorSKT', fullSKT);
     formData.append('namaOrganisasi', $('#namaOrganisasi').val());
+    formData.append('nomorPengajuan', $('#nomorPengajuan').val());
     formData.append('tanggalPengajuan', $('#tanggalPengajuan').val());
     formData.append('tanggalBerdiri', $('#tanggalBerdiri').val());
     formData.append('alamatSekretariat', $('#alamatSekretariat').val());
@@ -296,6 +295,9 @@
     formData.append('namaSekretaris', $('#namaSekretaris').val());
     formData.append('namaBendahara', $('#namaBendahara').val());
     formData.append('tanggalPenerbitan', $('#tanggalPenerbitan').val());
+    formData.append('namaKadis', $('#namaKadis').val());
+    formData.append('golonganKadis', $('#golonganKadis').val());
+    formData.append('nipKadis', $('#nipKadis').val());
 
     fetch(scriptURL, { method: 'POST', body: formData })
       .then(res => res.json())
@@ -303,10 +305,13 @@
         if (result.result === 'success') {
           $('#sktForm')[0].reset();
           $('#editId').val("-1");
-          syncWithServer(); // Tarik ulang tabel setelah sukses
+          // Kembalikan nama kepala dinas default jika form keriset
+          $('#namaKadis').val("ACHMAD MUGIYONO, S.STP., MM.");
+          $('#golonganKadis').val("Pembina");
+          $('#nipKadis').val("19830415 200212 1 002");
+          syncWithServer(); 
         } else { alert('Error: ' + result.message); }
-        
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server ';
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server Google Sheets';
         btn.disabled = false;
       });
   }
@@ -318,15 +323,12 @@
         ? `<button class="btn btn-sm btn-success" onclick="generateSKT(${index})" title="Sudah Dicetak (Klik untuk cetak ulang)"><i class="fa-solid fa-check-double"></i></button>`
         : `<button class="btn btn-sm btn-primary" onclick="generateSKT(${index})" title="Buat & Simpan PDF ke Drive"><i class="fa-solid fa-file-pdf"></i></button>`;
 
-      let actionBtns = `
-        <div class="d-flex gap-1 justify-content-center">
+      let actionBtns = `<div class="d-flex gap-1 justify-content-center">
             <button class="btn btn-sm btn-warning" onclick="editData(${index})" title="Edit Database"><i class="fa-solid fa-pen"></i></button>
             <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus dari Database"><i class="fa-solid fa-trash"></i></button>
-            ${btnPrint}
-        </div>
-      `;
+            ${btnPrint}</div>`;
       table.row.add([
-        index + 1, item.namaOrganisasi, item.tanggalPengajuan, item.tanggalBerdiri,
+        index + 1, item.namaOrganisasi, item.nomorPengajuan, item.tanggalPengajuan, item.tanggalBerdiri,
         item.alamatSekretariat, item.periode, item.namaKetua, item.namaSekretaris,
         item.namaBendahara, item.nomorSKT, item.tanggalPenerbitan, actionBtns
       ]);
@@ -336,7 +338,6 @@
 
   function editData(index) {
     let d = cloudData[index];
-    // Memecah format nomor SKT untuk mengambil angka tengahnya saja saat mode Edit
     let noTengah = d.nomorSKT;
     if (noTengah.includes('/')) {
         let parts = noTengah.split('/');
@@ -344,37 +345,33 @@
     }
     $('#nomorSKT').val(noTengah); 
     $('#namaOrganisasi').val(d.namaOrganisasi);
-    $('#tanggalPengajuan').val(d.tanggalPengajuan); $('#tanggalBerdiri').val(d.tanggalBerdiri);
-    $('#alamatSekretariat').val(d.alamatSekretariat); $('#periode').val(d.periode);
-    $('#namaKetua').val(d.namaKetua); $('#namaSekretaris').val(d.namaSekretaris);
-    $('#namaBendahara').val(d.namaBendahara); $('#tanggalPenerbitan').val(d.tanggalPenerbitan);
+    $('#nomorPengajuan').val(d.nomorPengajuan); $('#tanggalPengajuan').val(d.tanggalPengajuan); 
+    $('#tanggalBerdiri').val(d.tanggalBerdiri); $('#alamatSekretariat').val(d.alamatSekretariat); 
+    $('#periode').val(d.periode); $('#namaKetua').val(d.namaKetua); 
+    $('#namaSekretaris').val(d.namaSekretaris); $('#namaBendahara').val(d.namaBendahara); 
+    $('#tanggalPenerbitan').val(d.tanggalPenerbitan);
+    $('#namaKadis').val(d.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
+    $('#golonganKadis').val(d.golonganKadis || "Pembina");
+    $('#nipKadis').val(d.nipKadis || "19830415 200212 1 002");
     $('#editId').val(index);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // FUNGSI HAPUS DATA DARI SERVER
   function deleteData(index) {
     if(confirm('PERINGATAN: Hapus data ini secara permanen dari server Google Sheets?')) {
       let formData = new FormData();
       formData.append('action', 'hapusData');
       formData.append('rowId', cloudData[index].rowId);
-
-      fetch(scriptURL, { method: 'POST', body: formData })
-        .then(() => syncWithServer()); // Tarik ulang data
+      fetch(scriptURL, { method: 'POST', body: formData }).then(() => syncWithServer());
     }
   }
 
-  // FUNGSI CETAK DOKUMEN
   function generateSKT(index) {
     let targetData = cloudData[index];
     let formData = new FormData();
     formData.append('action', 'cetakPDF');
     formData.append('rowId', targetData.rowId);
-    
-    // Kirim data pendukung untuk template
-    for (let key in targetData) { 
-        if (key !== 'tercetak' && key !== 'rowId') formData.append(key, targetData[key]); 
-    }
+    for (let key in targetData) { if (key !== 'tercetak' && key !== 'rowId') formData.append(key, targetData[key]); }
 
     var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
     $('#loadingPdf').removeClass('d-none');
@@ -392,43 +389,10 @@
           $('#loadingPdf').addClass('d-none');
           $('#iframeContainer').removeClass('d-none');
           $('#modalFooterBtns').removeClass('d-none');
-          syncWithServer(); // Tarik ulang tabel agar tombol berubah hijau
+          syncWithServer();
         } else { alert('Error: ' + result.message); pdfModal.hide(); }
       });
   }
-
-// FUNGSI MEMBACA TAHUN DARI NOMOR SKT UNTUK MENGISI DROPDOWN FILTER
-  function extractYearsForFilter(data) {
-    let years = new Set();
-    data.forEach(item => {
-      let noSkt = item.nomorSKT || "";
-      if (noSkt.includes('/')) {
-        let parts = noSkt.split('/');
-        let yearPart = parts[parts.length - 1].trim(); // Mengambil angka tahun di paling belakang
-        if(yearPart.length === 4 && !isNaN(yearPart)) years.add(yearPart);
-      }
-    });
-    
-    let filterSelect = $('#filterTahunDatabase');
-    // Kosongkan dan buat opsi default
-    filterSelect.empty();
-    filterSelect.append('<option value="">Semua Data</option>');
-    
-    // Urutkan tahun dari yang terbaru ke terlama
-    let sortedYears = Array.from(years).sort((a,b) => b - a);
-    sortedYears.forEach(year => {
-      filterSelect.append(`<option value="${year}">Tahun ${year}</option>`);
-    });
-  }
-
-  // FUNGSI MENYARING TABEL SECARA INSTAN
-  function applyFilterDatabase() {
-    let selectedYear = $('#filterTahunDatabase').val();
-    // Melakukan pencarian spesifik pada kolom Nomor SKT (Kolom Index ke-9)
-    table.column(9).search(selectedYear).draw();
-  }
-
-
 </script>
 </body>
 </html>
