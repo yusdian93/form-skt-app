@@ -121,8 +121,8 @@
           <input type="text" class="form-control bg-light" id="namaKadis" value="ACHMAD MUGIYONO, S.STP., MM." required>
         </div>
         <div class="col-md-3 mb-3">
-          <label class="form-label text-muted small fw-bold">Golongan</label>
-          <input type="text" class="form-control bg-light" id="golonganKadis" value="Pembina" required>
+          <label class="form-label text-muted small fw-bold">Pangkat</label>
+          <input type="text" class="form-control bg-light" id="pangkatKadis" value="Pembina" required>
         </div>
         <div class="col-md-4 mb-3">
           <label class="form-label text-muted small fw-bold">NIP</label>
@@ -296,7 +296,10 @@
     formData.append('namaBendahara', $('#namaBendahara').val());
     formData.append('tanggalPenerbitan', $('#tanggalPenerbitan').val());
     formData.append('namaKadis', $('#namaKadis').val());
-    formData.append('golonganKadis', $('#golonganKadis').val());
+    
+    // NAMA VARIABEL TETAP 'golonganKadis' AGAR COCOK DENGAN GOOGLE APPS SCRIPT
+    formData.append('golonganKadis', $('#pangkatKadis').val()); 
+    
     formData.append('nipKadis', $('#nipKadis').val());
 
     fetch(scriptURL, { method: 'POST', body: formData })
@@ -307,7 +310,7 @@
           $('#editId').val("-1");
           // Kembalikan nama kepala dinas default jika form keriset
           $('#namaKadis').val("ACHMAD MUGIYONO, S.STP., MM.");
-          $('#golonganKadis').val("Pembina");
+          $('#pangkatKadis').val("Pembina");
           $('#nipKadis').val("19830415 200212 1 002");
           syncWithServer(); 
         } else { alert('Error: ' + result.message); }
@@ -351,7 +354,7 @@
     $('#namaSekretaris').val(d.namaSekretaris); $('#namaBendahara').val(d.namaBendahara); 
     $('#tanggalPenerbitan').val(d.tanggalPenerbitan);
     $('#namaKadis').val(d.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
-    $('#golonganKadis').val(d.golonganKadis || "Pembina");
+    $('#pangkatKadis').val(d.golonganKadis || "Pembina");
     $('#nipKadis').val(d.nipKadis || "19830415 200212 1 002");
     $('#editId').val(index);
     window.scrollTo({ top: 0, behavior: 'smooth' });
