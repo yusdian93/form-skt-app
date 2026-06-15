@@ -135,15 +135,26 @@
   </div>
 
   <div class="glass-card">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
       <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
-      <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
-        <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-filter text-primary"></i>&nbsp; Filter Tahun:</span>
-        <select id="filterTahunDatabase" class="form-select fw-bold text-dark" onchange="applyFilterDatabase()">
-          <option value="">Semua Data</option>
-        </select>
+      
+      <div class="d-flex flex-wrap gap-3">
+        <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
+          <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-calendar-day text-success"></i>&nbsp; Tanggal Pengajuan:</span>
+          <input type="text" id="filterTanggalPengajuan" class="form-control fw-bold text-dark" placeholder="Cari tanggal..." onkeyup="applyFilterTanggal()">
+        </div>
+        
+        <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
+          <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-filter text-primary"></i>&nbsp; Filter Tahun:</span>
+          <select id="filterTahunDatabase" class="form-select fw-bold text-dark" onchange="applyFilterDatabase()">
+            <option value="">Semua Data</option>
+          </select>
+        </div>
       </div>
     </div>
+
+
     <div class="table-responsive">
       <table id="rekapTable" class="table table-hover table-bordered w-100 align-middle">
         <thead>
@@ -250,7 +261,15 @@
     table.column(10).search(selectedYear).draw(); 
   }
 
-  function updateTahun() {
+ // --- TAMBAHKAN FUNGSI INI ---
+  function applyFilterTanggal() {
+    let selectedTanggal = $('#filterTanggalPengajuan').val();
+    // Kolom "Tanggal Pengajuan" berada di index ke-3 (ingat, index dimulai dari 0)
+    table.column(3).search(selectedTanggal).draw(); 
+  } 
+
+
+function updateTahun() {
     let tahun = document.getElementById('inputTahunGlobal').value;
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
     document.getElementById('addonTahun').innerText = tahun ? tahun : ".....";
