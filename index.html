@@ -563,7 +563,18 @@
     let formData = new FormData();
     formData.append('action', 'cetakPDF');
     formData.append('rowId', targetData.rowId);
-    for (let key in targetData) { if (key !== 'tercetak' && key !== 'rowId') formData.append(key, targetData[key]); }
+    
+    // Looping untuk memasukkan data, tapi kita cegat bagian tanggalnya
+    for (let key in targetData) { 
+      if (key !== 'tercetak' && key !== 'rowId') {
+        // Jika data yang dikirim adalah tanggal, ubah dulu ke format panjang
+        if (key === 'tanggalBerdiri' || key === 'tanggalPengajuan' || key === 'tanggalPenerbitan') {
+          formData.append(key, convertToLongIndoDate(targetData[key]));
+        } else {
+          formData.append(key, targetData[key]); 
+        }
+      } 
+    }
 
     var pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
     $('#loadingPdf').removeClass('d-none');
