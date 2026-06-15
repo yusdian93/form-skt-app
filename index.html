@@ -51,87 +51,126 @@
 
 <form id="sktForm" onsubmit="event.preventDefault(); saveToServer();">
       <input type="hidden" id="editId" value="-1">
-      
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nomor SKT</label>
-        <div class="input-group shadow-sm">
-          <span class="input-group-text fw-bold bg-light">400.4 /</span>
-          <input type="text" class="form-control fw-bold text-primary" id="nomorSKT" placeholder="Misal: 133" required>
-          <span class="input-group-text fw-bold bg-light">/ 54.03 / <span id="addonTahun">2024</span></span>
+
+      <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; overflow: hidden; background: rgba(255,255,255,0.9);">
+        <div class="card-header bg-primary text-white fw-bold py-3 border-0">
+          <i class="fa-solid fa-file-lines me-2"></i> 1. Informasi Registrasi SKT
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Nomor SKT</label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light fw-bold text-secondary">400.4 /</span>
+                <input type="text" class="form-control text-primary fw-bold text-center" id="nomorSKT" placeholder="133" required>
+                <span class="input-group-text bg-light fw-bold text-secondary">/ 54.03 / <span id="addonTahun">2024</span></span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Permohonan)</label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-hashtag text-muted"></i></span>
+                <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Tanggal Pengajuan</label>
+              <input type="date" class="form-control shadow-sm" id="tanggalPengajuan" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Tanggal Penerbitan SKT</label>
+              <input type="date" class="form-control shadow-sm border-primary" id="tanggalPenerbitan" required>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nama Organisasi</label>
-        <input type="text" class="form-control" id="namaOrganisasi" placeholder="Masukkan nama organisasi..." required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Surat Permohonan)</label>
-        <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
-      </div>
-      
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Tanggal Pengajuan</label>
-        <input type="date" class="form-control" id="tanggalPengajuan" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Tanggal Berdiri Organisasi</label>
-        <input type="date" class="form-control" id="tanggalBerdiri" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Alamat Sekretariat</label>
-        <textarea class="form-control" id="alamatSekretariat" rows="2" placeholder="Masukkan alamat lengkap..." required></textarea>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Kepengurusan / Periode</label>
-        <div class="input-group shadow-sm">
-          <input type="number" class="form-control text-center fw-bold text-primary" id="periodeMulai" placeholder="Mulai (Contoh: 2024)" min="2000" max="2100" required>
-          <span class="input-group-text bg-light fw-bold">s/d</span>
-          <input type="number" class="form-control text-center fw-bold text-primary" id="periodeSelesai" placeholder="Selesai (Contoh: 2029)" min="2000" max="2100" required>
+      <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; overflow: hidden; background: rgba(255,255,255,0.9);">
+        <div class="card-header bg-success text-white fw-bold py-3 border-0">
+          <i class="fa-solid fa-users-viewfinder me-2"></i> 2. Profil Organisasi
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <label class="form-label text-muted small fw-bold">Nama Organisasi</label>
+            <input type="text" class="form-control form-control-lg shadow-sm fs-6" id="namaOrganisasi" placeholder="Masukkan nama organisasi secara lengkap..." required>
+          </div>
+          <div class="row g-4 mb-4">
+            <div class="col-md-5">
+              <label class="form-label text-muted small fw-bold">Tanggal Berdiri</label>
+              <input type="date" class="form-control shadow-sm" id="tanggalBerdiri" required>
+            </div>
+            <div class="col-md-7">
+              <label class="form-label text-muted small fw-bold">Kepengurusan / Periode</label>
+              <div class="input-group shadow-sm">
+                <input type="number" class="form-control text-center text-success fw-bold" id="periodeMulai" placeholder="Tahun Mulai" min="2000" max="2100" required>
+                <span class="input-group-text bg-light text-secondary fw-bold">s/d</span>
+                <input type="number" class="form-control text-center text-success fw-bold" id="periodeSelesai" placeholder="Tahun Selesai" min="2000" max="2100" required>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label text-muted small fw-bold">Alamat Sekretariat</label>
+            <textarea class="form-control shadow-sm" id="alamatSekretariat" rows="2" placeholder="Masukkan detail jalan, RT/RW, dan desa/kelurahan..." required></textarea>
+          </div>
         </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nama Ketua</label>
-        <input type="text" class="form-control" id="namaKetua" required>
+      <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; overflow: hidden; background: rgba(255,255,255,0.9);">
+        <div class="card-header bg-warning text-dark fw-bold py-3 border-0">
+          <i class="fa-solid fa-sitemap me-2"></i> 3. Susunan Pengurus
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold">Nama Ketua</label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-user-tie text-warning"></i></span>
+                <input type="text" class="form-control" id="namaKetua" placeholder="Nama Ketua" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold">Nama Sekretaris</label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-user-pen text-warning"></i></span>
+                <input type="text" class="form-control" id="namaSekretaris" placeholder="Nama Sekretaris" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold">Nama Bendahara</label>
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-calculator text-warning"></i></span>
+                <input type="text" class="form-control" id="namaBendahara" placeholder="Nama Bendahara" required>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nama Sekretaris</label>
-        <input type="text" class="form-control" id="namaSekretaris" required>
+      <div class="card border-0 shadow-sm mb-5" style="border-radius: 15px; overflow: hidden; background: rgba(248,249,250,0.9);">
+        <div class="card-header bg-secondary text-white fw-bold py-3 border-0">
+          <i class="fa-solid fa-stamp me-2"></i> 4. Otorisasi (Penanda Tangan SKT)
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-md-5">
+              <label class="form-label text-muted small fw-bold">Nama Kepala Dinas</label>
+              <input type="text" class="form-control text-secondary fw-bold" id="namaKadis" value="ACHMAD MUGIYONO, S.STP., MM." required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label text-muted small fw-bold">Pangkat</label>
+              <input type="text" class="form-control text-secondary" id="pangkatKadis" value="Pembina" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label text-muted small fw-bold">NIP</label>
+              <input type="text" class="form-control text-secondary" id="nipKadis" value="19830415 200212 1 002" required>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nama Bendahara</label>
-        <input type="text" class="form-control" id="namaBendahara" required>
-      </div>
-
-      <div class="mb-4">
-        <label class="form-label text-muted small fw-bold">Tanggal Penerbitan SKT</label>
-        <input type="date" class="form-control" id="tanggalPenerbitan" required>
-      </div>
-
-      <hr class="mb-4">
-      <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-user-tie"></i> Penanda Tangan SKT (Kepala Dinas)</h6>
-      
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Nama Kepala Dinas</label>
-        <input type="text" class="form-control bg-light" id="namaKadis" value="ACHMAD MUGIYONO, S.STP., MM." required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label text-muted small fw-bold">Pangkat</label>
-        <input type="text" class="form-control bg-light" id="pangkatKadis" value="Pembina" required>
-      </div>
-      <div class="mb-4">
-        <label class="form-label text-muted small fw-bold">NIP</label>
-        <input type="text" class="form-control bg-light" id="nipKadis" value="19830415 200212 1 002" required>
-      </div>
-
-      <button type="submit" id="btnSubmit" class="btn btn-ai w-100 py-3 fs-5"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server Google Sheets</button>
+      <button type="submit" id="btnSubmit" class="btn btn-ai w-100 py-3 fs-5 rounded-pill shadow" style="letter-spacing: 1px;">
+        <i class="fa-solid fa-cloud-arrow-up me-2"></i> Simpan Database & Siapkan SKT
+      </button>
     </form>
   
 
