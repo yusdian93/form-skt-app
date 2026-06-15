@@ -48,8 +48,7 @@
   <div class="glass-card mx-auto" style="max-width: 1000px;">
     <h4 class="mb-4"><i class="fa-solid fa-pen-to-square"></i> Form Input Data</h4>
     
-
-<form id="sktForm" onsubmit="event.preventDefault(); saveToServer();">
+    <form id="sktForm" onsubmit="event.preventDefault(); saveToServer();">
       <input type="hidden" id="editId" value="-1">
 
       <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px; overflow: hidden; background: rgba(255,255,255,0.9);">
@@ -172,15 +171,17 @@
         <i class="fa-solid fa-cloud-arrow-up me-2"></i> Simpan Database & Siapkan SKT
       </button>
     </form>
-  
-
-</div>
+  </div>
 
   <div class="glass-card">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
       <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
       
       <div class="d-flex flex-wrap gap-3">
+        <button class="btn btn-danger shadow-sm fw-bold d-flex align-items-center" onclick="cetakMassal()" title="Cetak Semua SKT yang Tampil di Tabel">
+          <i class="fa-solid fa-print me-2"></i> Cetak Massal SKT
+        </button>
+
         <div class="input-group shadow-sm" style="width: auto; min-width: 280px;">
           <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-calendar-day text-success"></i>&nbsp; Tgl Pengajuan:</span>
           <input type="date" id="filterTanggalPengajuan" class="form-control fw-bold text-dark" onchange="applyFilterTanggal()">
@@ -236,6 +237,24 @@
       <div class="modal-footer border-0 justify-content-center d-none" id="modalFooterBtns">
         <a id="btnDownload" href="#" target="_blank" class="btn btn-success px-4"><i class="fa-solid fa-download"></i> Unduh PDF</a>
         <a id="btnPrint" href="#" target="_blank" class="btn btn-primary px-4"><i class="fa-solid fa-print"></i> Cetak Dokumen</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="massalModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content glass-card border-0">
+      <div class="modal-body text-center p-5">
+        <h5 class="fw-bold text-primary mb-4"><i class="fa-solid fa-gears text-danger"></i> Proses Cetak Massal Otomatis</h5>
+        <div class="progress shadow-sm mb-3" style="height: 25px; border-radius: 15px;">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger fw-bold" style="width: 0%;">0%</div>
+        </div>
+        <p id="progressText" class="text-muted fw-bold">Menyiapkan data...</p>
+        
+        <div id="massalResult" class="d-none mt-4 text-start shadow-sm rounded p-2 bg-light" style="max-height: 250px; overflow-y: auto;"></div>
+        
+        <button id="btnTutupMassal" class="btn btn-secondary mt-4 d-none w-100 fw-bold py-2" data-bs-dismiss="modal" onclick="syncWithServer()"><i class="fa-solid fa-check"></i> Selesai & Refresh Data</button>
       </div>
     </div>
   </div>
@@ -343,7 +362,6 @@
     let year = parts[2];
     return `${year}-${month}-${day}`;
   }
-  // ==========================================
 
   $(document).ready(function() {
     function getJudulSKT() {
@@ -355,9 +373,9 @@
       dom: 'Bfrtip',
       scrollX: true, 
       buttons: [
-        { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] } },
-        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }, customize: function(doc){ doc.content[0].text = getJudulSKT(); doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14; doc.content[0].bold = true; doc.content[0].margin = [0, 0, 0, 15]; } },
-        { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel', title: '', messageTop: function() { return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; }, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] } }
+        { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } } },
+        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } }, customize: function(doc){ doc.content[0].text = getJudulSKT(); doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14; doc.content[0].bold = true; doc.content[0].margin = [0, 0, 0, 15]; } },
+        { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel', title: '', messageTop: function() { return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; }, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } } }
       ],
       language: { search: "Cari Data:", zeroRecords: "Data tidak ditemukan atau sedang disinkronkan..." }
     });
@@ -388,20 +406,13 @@
 
   function applyFilterTanggal() {
     let rawDate = $('#filterTanggalPengajuan').val(); 
-    
-    if (!rawDate) {
-      table.column(3).search('').draw(); 
-      return;
-    }
-
+    if (!rawDate) { table.column(3).search('').draw(); return; }
     let parts = rawDate.split('-');
     let year = parts[0];
     let monthIndex = parseInt(parts[1]) - 1;
     let day = parseInt(parts[2]); 
-
     let monthName = namaBulanIndo[monthIndex];
     let searchRegex = `^\\s*0?${day}\\s+${monthName}\\s+${year}\\s*$`;
-
     table.column(3).search(searchRegex, true, false, true).draw(); 
   } 
 
@@ -475,7 +486,7 @@
           $('#nipKadis').val("19830415 200212 1 002");
           syncWithServer(); 
         } else { alert('Error: ' + result.message); }
-        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Data ke Server Google Sheets';
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up me-2"></i> Simpan Database & Siapkan SKT';
         btn.disabled = false;
       });
   }
@@ -543,7 +554,7 @@
     $('#namaBendahara').val(d.namaBendahara); 
     $('#tanggalPenerbitan').val(formatIndoToDate(d.tanggalPenerbitan));
     $('#namaKadis').val(d.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
-    $('#pangkatKadis').val(d.golonganKadis || "Pembina");
+    $('#pangkatKadis').val(d.pangkat || "Pembina");
     $('#nipKadis').val(d.nipKadis || "19830415 200212 1 002");
     $('#editId').val(index);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -564,10 +575,8 @@
     formData.append('action', 'cetakPDF');
     formData.append('rowId', targetData.rowId);
     
-    // Looping untuk memasukkan data, tapi kita cegat bagian tanggalnya
     for (let key in targetData) { 
       if (key !== 'tercetak' && key !== 'rowId') {
-        // Jika data yang dikirim adalah tanggal, ubah dulu ke format panjang
         if (key === 'tanggalBerdiri' || key === 'tanggalPengajuan' || key === 'tanggalPenerbitan') {
           formData.append(key, convertToLongIndoDate(targetData[key]));
         } else {
@@ -595,6 +604,73 @@
           syncWithServer();
         } else { alert('Error: ' + result.message); pdfModal.hide(); }
       });
+  }
+
+  async function cetakMassal() {
+    let filteredIndexes = table.rows({ search: 'applied' }).indexes().toArray();
+    
+    if (filteredIndexes.length === 0) {
+      alert("Tidak ada data yang tampil untuk dicetak. Silakan sesuaikan filter Anda.");
+      return;
+    }
+
+    if (!confirm(`Anda akan memproses cetak PDF untuk ${filteredIndexes.length} organisasi secara otomatis.\nProses ini akan berjalan satu per satu. Lanjutkan?`)) {
+      return;
+    }
+
+    var massalModal = new bootstrap.Modal(document.getElementById('massalModal'));
+    $('#progressBar').css('width', '0%').text('0%').removeClass('bg-success').addClass('bg-danger');
+    $('#progressText').text(`Memulai proses 0 dari ${filteredIndexes.length} dokumen...`);
+    $('#massalResult').html('').addClass('d-none');
+    $('#btnTutupMassal').addClass('d-none');
+    massalModal.show();
+
+    let successCount = 0;
+    let htmlResult = '<ul class="list-group small border-0">';
+
+    for (let i = 0; i < filteredIndexes.length; i++) {
+      let realIndex = filteredIndexes[i];
+      let targetData = cloudData[realIndex];
+      
+      $('#progressText').text(`Memproses: ${targetData.namaOrganisasi} (${i + 1}/${filteredIndexes.length})...`);
+      
+      let formData = new FormData();
+      formData.append('action', 'cetakPDF');
+      formData.append('rowId', targetData.rowId);
+      
+      for (let key in targetData) { 
+        if (key !== 'tercetak' && key !== 'rowId') {
+          if (key === 'tanggalBerdiri' || key === 'tanggalPengajuan' || key === 'tanggalPenerbitan') {
+            formData.append(key, convertToLongIndoDate(targetData[key]));
+          } else {
+            formData.append(key, targetData[key]); 
+          }
+        } 
+      }
+
+      try {
+        let response = await fetch(scriptURL, { method: 'POST', body: formData });
+        let result = await response.json();
+        
+        if (result.result === 'success') {
+          successCount++;
+          htmlResult += `<li class="list-group-item list-group-item-success d-flex justify-content-between align-items-center mb-1 rounded"><span class="fw-bold"><i class="fa-solid fa-check text-success"></i> ${targetData.namaOrganisasi}</span> <a href="${result.pdfUrl}" target="_blank" class="btn btn-sm btn-primary py-1"><i class="fa-solid fa-print"></i> Buka/Print</a></li>`;
+        } else {
+          htmlResult += `<li class="list-group-item list-group-item-danger mb-1 rounded"><i class="fa-solid fa-xmark text-danger"></i> ${targetData.namaOrganisasi} (Gagal Server)</li>`;
+        }
+      } catch (e) {
+          htmlResult += `<li class="list-group-item list-group-item-danger mb-1 rounded"><i class="fa-solid fa-wifi text-danger"></i> ${targetData.namaOrganisasi} (Error Jaringan)</li>`;
+      }
+
+      let percent = Math.round(((i + 1) / filteredIndexes.length) * 100);
+      $('#progressBar').css('width', percent + '%').text(percent + '%');
+    }
+
+    htmlResult += '</ul>';
+    $('#progressBar').removeClass('bg-danger').addClass('bg-success');
+    $('#progressText').text(`Proses Selesai! Berhasil memproses ${successCount} dari ${filteredIndexes.length} dokumen.`);
+    $('#massalResult').html(htmlResult).removeClass('d-none');
+    $('#btnTutupMassal').removeClass('d-none');
   }
 </script>
 </body>
