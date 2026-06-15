@@ -318,11 +318,37 @@
 
 
 
- // --- TAMBAHKAN FUNGSI INI ---
+ // --- FUNGSI FILTER MENGGUNAKAN KALENDER (VERSI CERDAS/REGEX) ---
   function applyFilterTanggal() {
-    let selectedTanggal = $('#filterTanggalPengajuan').val();
-    // Kolom "Tanggal Pengajuan" berada di index ke-3 (ingat, index dimulai dari 0)
-    table.column(3).search(selectedTanggal).draw(); 
+    let rawDate = $('#filterTanggalPengajuan').val(); 
+    
+    // Jika kalender disilang/dikosongkan, kembalikan tabel seperti semula
+    if (!rawDate) {
+      table.column(3).search('').draw(); 
+      return;
+    }
+
+    // Memecah data dari kalender (Contoh: "2024-01-03")
+    let parts = rawDate.split('-');
+    let year = parts[0];
+    let monthIndex = parseInt(parts[1]) - 1;
+    let day = parseInt(parts[2]); // Menghasilkan angka 3 murni (tanpa 0 di depan)
+
+    // Daftar bulan untuk pencocokan
+    const namaBulanIndo = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    let monthName = namaBulanIndo[monthIndex];
+
+    // MEMBUAT RUMUS PENCARIAN REGEX (SANGAT FLEKSIBEL)
+    // ^\\s*0?${day} : Membaca "3" atau "03", menolak "13" atau "23"
+    // \\s+ : Mengabaikan jika di database ada spasi ganda atau salah ketik spasi
+    let searchRegex = `^\\s*0?${day}\\s+${monthName}\\s+${year}\\s*$`;
+
+    // Terapkan ke tabel DataTables pada Kolom Index ke-3 (Tanggal Pengajuan)
+    // Pengaturan: (Katakunci, Gunakan_Regex, Matikan_SmartSearch, Abaikan_HurufBesarKecil)
+    table.column(3).search(searchRegex, true, false, true).draw(); 
   } 
 
 
