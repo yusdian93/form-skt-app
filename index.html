@@ -70,8 +70,7 @@
           <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Surat Permohonan)</label>
           <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
         </div>
-        
-      <div class="col-md-6 mb-3">
+        <div class="col-md-6 mb-3">
           <label class="form-label text-muted small fw-bold">Tanggal Pengajuan</label>
           <input type="date" class="form-control" id="tanggalPengajuan" required>
         </div>
@@ -140,12 +139,10 @@
   </div>
 
   <div class="glass-card">
-    
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
       <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
       
       <div class="d-flex flex-wrap gap-3">
-        
         <div class="input-group shadow-sm" style="width: auto; min-width: 280px;">
           <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-calendar-day text-success"></i>&nbsp; Tgl Pengajuan:</span>
           <input type="date" id="filterTanggalPengajuan" class="form-control fw-bold text-dark" onchange="applyFilterTanggal()">
@@ -158,11 +155,8 @@
             <option value="">Semua Data</option>
           </select>
         </div>
-
       </div>
     </div>
-    </div>
-
 
     <div class="table-responsive">
       <table id="rekapTable" class="table table-hover table-bordered w-100 align-middle">
@@ -221,32 +215,38 @@
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
+<script>
+  let cloudData = [];
+  let table;
+  
+  // MASUKKAN URL API GOOGLE ANDA DI SINI
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
 
-// --- FUNGSI UNTUK MENGUBAH SEGALA FORMAT TANGGAL RINGKAS MENJADI FORMAT LENGKAP ---
+  // ==========================================
+  // KUMPULAN FUNGSI BANTUAN TANGGAL
+  // ==========================================
+  const namaBulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
   function convertToLongIndoDate(dateStr) {
     if (!dateStr) return "";
     dateStr = dateStr.toString().trim();
     
-    const namaBulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    
-    // 1. Jika format sudah benar (contoh: "21 Desember 2022")
     let matchLengkap = dateStr.split(' ');
     if (matchLengkap.length === 3 && namaBulanIndo.some(b => b.toLowerCase() === matchLengkap[1].toLowerCase())) {
       let bIndex = namaBulanIndo.findIndex(b => b.toLowerCase() === matchLengkap[1].toLowerCase());
       return `${parseInt(matchLengkap[0])} ${namaBulanIndo[bIndex]} ${matchLengkap[2]}`;
     }
 
-    // 2. Jika format menggunakan strip (contoh: 21-Des-22, 21-Dec-22, 2022-12-21)
     if (dateStr.includes('-')) {
       let parts = dateStr.split('-');
-      if (parts[0].length === 4) { // Format bawaan YYYY-MM-DD
+      if (parts[0].length === 4) { 
         return `${parseInt(parts[2])} ${namaBulanIndo[parseInt(parts[1]) - 1]} ${parts[0]}`;
       }
-      if (parts.length === 3) { // Format DD-MMM-YY atau DD-MM-YYYY
+      if (parts.length === 3) { 
         let day = parseInt(parts[0]);
         let monthPart = parts[1].toLowerCase();
         let year = parts[2];
-        if (year.length === 2) year = "20" + year; // Ubah "22" menjadi "2022"
+        if (year.length === 2) year = "20" + year; 
         
         let monthIndex = -1;
         if (monthPart.startsWith('jan')) monthIndex = 0;
@@ -269,7 +269,6 @@
       }
     }
 
-    // 3. Jika format menggunakan garis miring (contoh: 21/12/2022 atau 21/12/22)
     if (dateStr.includes('/')) {
       let parts = dateStr.split('/');
       if (parts.length === 3) {
@@ -283,22 +282,9 @@
       }
     }
     
-    return dateStr; // Kembalikan teks asli jika tidak mendeteksi format di atas
+    return dateStr; 
   }
 
-
-
-<script>
-  let cloudData = [];
-  let table;
-  
-  // MASUKKAN URL API GOOGLE ANDA DI SINI (YANG BARU)
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
-
-// --- FUNGSI BANTUAN KONVERSI TANGGAL ---
-  const namaBulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
-  // Mengubah "2024-03-13" (dari kalender) menjadi "13 Maret 2024" (untuk disimpan/ditampilkan)
   function formatDateToIndo(rawDate) {
     if (!rawDate) return "";
     let parts = rawDate.split('-');
@@ -309,7 +295,6 @@
     return `${day} ${namaBulanIndo[monthIndex]} ${year}`;
   }
 
-  // Mengubah "13 Maret 2024" (dari database) menjadi "2024-03-13" (agar terbaca oleh kalender saat mode Edit)
   function formatIndoToDate(indoDate) {
     if (!indoDate) return "";
     let parts = indoDate.split(' ');
@@ -320,7 +305,7 @@
     let year = parts[2];
     return `${year}-${month}-${day}`;
   }
-
+  // ==========================================
 
   $(document).ready(function() {
     function getJudulSKT() {
@@ -360,66 +345,34 @@
 
   function applyFilterDatabase() {
     let selectedYear = $('#filterTahunDatabase').val();
-    // Bergeser ke index 10 karena kolom baru (Nomor Pengajuan masuk di index 2)
     table.column(10).search(selectedYear).draw(); 
   }
 
-// --- FUNGSI FILTER MENGGUNAKAN KALENDER ---
-  function applyFilterTanggal() {
-    // Ambil nilai dari input kalender (Format asli komputer: YYYY-MM-DD)
-    let rawDate = $('#filterTanggalPengajuan').val(); 
-    
-    // Konversi ke format tabel menggunakan fungsi yang sudah Anda buat ("13 Maret 2024")
-    // Jika tidak ada tanggal yang dipilih, kembalikan teks kosong
-    let searchValue = rawDate ? formatDateToIndo(rawDate) : ""; 
-
-    // Terapkan pencarian ke Kolom ke-3 (Tanggal Pengajuan)
-    table.column(3).search(searchValue).draw(); 
-  }
-
-  // --- FUNGSI UNTUK MERESET FILTER ---
-  function resetFilterTanggal() {
-    $('#filterTanggalPengajuan').val(''); // Kosongkan input kalender
-    table.column(3).search('').draw();    // Tampilkan kembali semua data di tabel
-  }
-
-
-
- // --- FUNGSI FILTER MENGGUNAKAN KALENDER (VERSI CERDAS/REGEX) ---
   function applyFilterTanggal() {
     let rawDate = $('#filterTanggalPengajuan').val(); 
     
-    // Jika kalender disilang/dikosongkan, kembalikan tabel seperti semula
     if (!rawDate) {
       table.column(3).search('').draw(); 
       return;
     }
 
-    // Memecah data dari kalender (Contoh: "2024-01-03")
     let parts = rawDate.split('-');
     let year = parts[0];
     let monthIndex = parseInt(parts[1]) - 1;
-    let day = parseInt(parts[2]); // Menghasilkan angka 3 murni (tanpa 0 di depan)
+    let day = parseInt(parts[2]); 
 
-    // Daftar bulan untuk pencocokan
-    const namaBulanIndo = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
     let monthName = namaBulanIndo[monthIndex];
-
-    // MEMBUAT RUMUS PENCARIAN REGEX (SANGAT FLEKSIBEL)
-    // ^\\s*0?${day} : Membaca "3" atau "03", menolak "13" atau "23"
-    // \\s+ : Mengabaikan jika di database ada spasi ganda atau salah ketik spasi
     let searchRegex = `^\\s*0?${day}\\s+${monthName}\\s+${year}\\s*$`;
 
-    // Terapkan ke tabel DataTables pada Kolom Index ke-3 (Tanggal Pengajuan)
-    // Pengaturan: (Katakunci, Gunakan_Regex, Matikan_SmartSearch, Abaikan_HurufBesarKecil)
     table.column(3).search(searchRegex, true, false, true).draw(); 
   } 
 
+  function resetFilterTanggal() {
+    $('#filterTanggalPengajuan').val(''); 
+    table.column(3).search('').draw();    
+  }
 
-function updateTahun() {
+  function updateTahun() {
     let tahun = document.getElementById('inputTahunGlobal').value;
     document.getElementById('displayTahun').innerText = tahun ? tahun : ".....";
     document.getElementById('addonTahun').innerText = tahun ? tahun : ".....";
@@ -460,18 +413,17 @@ function updateTahun() {
     formData.append('tanggalPengajuan', formatDateToIndo($('#tanggalPengajuan').val()));
     formData.append('tanggalBerdiri', formatDateToIndo($('#tanggalBerdiri').val()));
     formData.append('alamatSekretariat', $('#alamatSekretariat').val());
+    
     let thnMulai = $('#periodeMulai').val();
     let thnSelesai = $('#periodeSelesai').val();
     formData.append('periode', thnMulai + ' s/d ' + thnSelesai);
+    
     formData.append('namaKetua', $('#namaKetua').val());
     formData.append('namaSekretaris', $('#namaSekretaris').val());
     formData.append('namaBendahara', $('#namaBendahara').val());
     formData.append('tanggalPenerbitan', formatDateToIndo($('#tanggalPenerbitan').val()));
     formData.append('namaKadis', $('#namaKadis').val());
-    
-    // NAMA VARIABEL TETAP 'golonganKadis' AGAR COCOK DENGAN GOOGLE APPS SCRIPT
     formData.append('golonganKadis', $('#pangkatKadis').val()); 
-    
     formData.append('nipKadis', $('#nipKadis').val());
 
     fetch(scriptURL, { method: 'POST', body: formData })
@@ -480,7 +432,6 @@ function updateTahun() {
         if (result.result === 'success') {
           $('#sktForm')[0].reset();
           $('#editId').val("-1");
-          // Kembalikan nama kepala dinas default jika form keriset
           $('#namaKadis').val("ACHMAD MUGIYONO, S.STP., MM.");
           $('#pangkatKadis').val("Pembina");
           $('#nipKadis').val("19830415 200212 1 002");
@@ -491,10 +442,7 @@ function updateTahun() {
       });
   }
 
-  
-
-
-function renderTable() {
+  function renderTable() {
     table.clear();
     cloudData.forEach((item, index) => {
       let btnPrint = item.tercetak 
@@ -506,7 +454,6 @@ function renderTable() {
             <button class="btn btn-sm btn-danger" onclick="deleteData(${index})" title="Hapus dari Database"><i class="fa-solid fa-trash"></i></button>
             ${btnPrint}</div>`;
 
-      // --- PROSES KONVERSI OTOMATIS TANGGAL DARI SERVER DI SINI ---
       let tglBerdiriTampil = convertToLongIndoDate(item.tanggalBerdiri);
       let tglPengajuanTampil = convertToLongIndoDate(item.tanggalPengajuan);
       let tglPenerbitanTampil = convertToLongIndoDate(item.tanggalPenerbitan);
@@ -515,15 +462,15 @@ function renderTable() {
         index + 1, 
         item.namaOrganisasi, 
         item.nomorPengajuan, 
-        tglPengajuanTampil,     // Menggunakan tanggal pengajuan yang rapi
-        tglBerdiriTampil,       // Sesuai permintaan Anda: mengubah "21-Des-22" menjadi "21 Desember 2022"
+        tglPengajuanTampil,     
+        tglBerdiriTampil,       
         item.alamatSekretariat, 
         item.periode, 
         item.namaKetua, 
         item.namaSekretaris,
         item.namaBendahara, 
         item.nomorSKT, 
-        tglPenerbitanTampil,    // Menggunakan tanggal penerbitan yang rapi
+        tglPenerbitanTampil,    
         actionBtns
       ]);
     });
@@ -539,18 +486,23 @@ function renderTable() {
     }
     $('#nomorSKT').val(noTengah); 
     $('#namaOrganisasi').val(d.namaOrganisasi);
-    $('#nomorPengajuan').val(d.nomorPengajuan); $('#tanggalPengajuan').val(formatIndoToDate(d.tanggalPengajuan)); 
-    $('#tanggalBerdiri').val(formatIndoToDate(d.tanggalBerdiri)); $('#alamatSekretariat').val(d.alamatSekretariat); 
+    $('#nomorPengajuan').val(d.nomorPengajuan); 
+    $('#tanggalPengajuan').val(formatIndoToDate(d.tanggalPengajuan)); 
+    $('#tanggalBerdiri').val(formatIndoToDate(d.tanggalBerdiri)); 
+    $('#alamatSekretariat').val(d.alamatSekretariat); 
+    
     if (d.periode && d.periode.includes(' s/d ')) {
         let rentangPeriode = d.periode.split(' s/d ');
         $('#periodeMulai').val(rentangPeriode[0].trim());
         $('#periodeSelesai').val(rentangPeriode[1].trim());
     } else {
-        // Jika data lama tidak memakai format "s/d", masukkan langsung ke kotak mulai saja
         $('#periodeMulai').val(d.periode);
         $('#periodeSelesai').val('');
-    } $('#namaKetua').val(d.namaKetua); 
-    $('#namaSekretaris').val(d.namaSekretaris); $('#namaBendahara').val(d.namaBendahara); 
+    } 
+    
+    $('#namaKetua').val(d.namaKetua); 
+    $('#namaSekretaris').val(d.namaSekretaris); 
+    $('#namaBendahara').val(d.namaBendahara); 
     $('#tanggalPenerbitan').val(formatIndoToDate(d.tanggalPenerbitan));
     $('#namaKadis').val(d.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
     $('#pangkatKadis').val(d.golonganKadis || "Pembina");
