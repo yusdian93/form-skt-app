@@ -145,9 +145,11 @@
       <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
       
       <div class="d-flex flex-wrap gap-3">
-        <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
-          <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-calendar-day text-success"></i>&nbsp; Tanggal Pengajuan:</span>
-          <input type="text" id="filterTanggalPengajuan" class="form-control fw-bold text-dark" placeholder="Cari tanggal..." onkeyup="applyFilterTanggal()">
+        
+        <div class="input-group shadow-sm" style="width: auto; min-width: 280px;">
+          <span class="input-group-text bg-light fw-bold"><i class="fa-solid fa-calendar-day text-success"></i>&nbsp; Tgl Pengajuan:</span>
+          <input type="date" id="filterTanggalPengajuan" class="form-control fw-bold text-dark" onchange="applyFilterTanggal()">
+          <button class="btn btn-outline-danger" type="button" onclick="resetFilterTanggal()" title="Reset Filter Tanggal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div class="input-group shadow-sm" style="width: auto; min-width: 250px;">
@@ -156,7 +158,9 @@
             <option value="">Semua Data</option>
           </select>
         </div>
+
       </div>
+    </div>
     </div>
 
 
@@ -292,6 +296,27 @@
     // Bergeser ke index 10 karena kolom baru (Nomor Pengajuan masuk di index 2)
     table.column(10).search(selectedYear).draw(); 
   }
+
+// --- FUNGSI FILTER MENGGUNAKAN KALENDER ---
+  function applyFilterTanggal() {
+    // Ambil nilai dari input kalender (Format asli komputer: YYYY-MM-DD)
+    let rawDate = $('#filterTanggalPengajuan').val(); 
+    
+    // Konversi ke format tabel menggunakan fungsi yang sudah Anda buat ("13 Maret 2024")
+    // Jika tidak ada tanggal yang dipilih, kembalikan teks kosong
+    let searchValue = rawDate ? formatDateToIndo(rawDate) : ""; 
+
+    // Terapkan pencarian ke Kolom ke-3 (Tanggal Pengajuan)
+    table.column(3).search(searchValue).draw(); 
+  }
+
+  // --- FUNGSI UNTUK MERESET FILTER ---
+  function resetFilterTanggal() {
+    $('#filterTanggalPengajuan').val(''); // Kosongkan input kalender
+    table.column(3).search('').draw();    // Tampilkan kembali semua data di tabel
+  }
+
+
 
  // --- TAMBAHKAN FUNGSI INI ---
   function applyFilterTanggal() {
