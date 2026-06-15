@@ -70,9 +70,10 @@
           <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Surat Permohonan)</label>
           <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
         </div>
-        <div class="col-md-6 mb-3">
+        
+      <div class="col-md-6 mb-3">
           <label class="form-label text-muted small fw-bold">Tanggal Pengajuan</label>
-          <input type="text" class="form-control" id="tanggalPengajuan" placeholder="Misal: 13 Maret 2024" required>
+          <input type="date" class="form-control" id="tanggalPengajuan" required>
         </div>
       </div>
 
@@ -86,7 +87,7 @@
       <div class="row">
         <div class="col-md-3 mb-3">
           <label class="form-label text-muted small fw-bold">Tanggal Berdiri</label>
-          <input type="text" class="form-control" id="tanggalBerdiri" placeholder="Misal: 7 Maret 2024" required>
+          <input type="date" class="form-control" id="tanggalBerdiri" required>
         </div>
         <div class="col-md-3 mb-3">
           <label class="form-label text-muted small fw-bold">Nama Ketua</label>
@@ -105,11 +106,15 @@
       <div class="row">
         <div class="col-md-6 mb-4">
           <label class="form-label text-muted small fw-bold">Kepengurusan / Periode</label>
-          <input type="text" class="form-control" id="periode" placeholder="Misal: 2024 s/d 2029" required>
+          <div class="input-group shadow-sm">
+            <input type="number" class="form-control text-center fw-bold text-primary" id="periodeMulai" placeholder="Mulai (Contoh: 2024)" min="2000" max="2100" required>
+            <span class="input-group-text bg-light fw-bold">s/d</span>
+            <input type="number" class="form-control text-center fw-bold text-primary" id="periodeSelesai" placeholder="Selesai (Contoh: 2029)" min="2000" max="2100" required>
+          </div>
         </div>
         <div class="col-md-6 mb-4">
           <label class="form-label text-muted small fw-bold">Tanggal Penerbitan SKT</label>
-          <input type="text" class="form-control" id="tanggalPenerbitan" placeholder="Misal: 7 Maret 2024" required>
+          <input type="date" class="form-control" id="tanggalPenerbitan" required>
         </div>
       </div>
 
@@ -219,6 +224,33 @@
   // MASUKKAN URL API GOOGLE ANDA DI SINI (YANG BARU)
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
 
+// --- FUNGSI BANTUAN KONVERSI TANGGAL ---
+  const namaBulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+  // Mengubah "2024-03-13" (dari kalender) menjadi "13 Maret 2024" (untuk disimpan/ditampilkan)
+  function formatDateToIndo(rawDate) {
+    if (!rawDate) return "";
+    let parts = rawDate.split('-');
+    if (parts.length !== 3) return rawDate;
+    let year = parts[0];
+    let monthIndex = parseInt(parts[1]) - 1;
+    let day = parseInt(parts[2]);
+    return `${day} ${namaBulanIndo[monthIndex]} ${year}`;
+  }
+
+  // Mengubah "13 Maret 2024" (dari database) menjadi "2024-03-13" (agar terbaca oleh kalender saat mode Edit)
+  function formatIndoToDate(indoDate) {
+    if (!indoDate) return "";
+    let parts = indoDate.split(' ');
+    if (parts.length !== 3) return indoDate; 
+    let day = parts[0].padStart(2, '0');
+    let monthIndex = namaBulanIndo.indexOf(parts[1]) + 1;
+    let month = monthIndex.toString().padStart(2, '0');
+    let year = parts[2];
+    return `${year}-${month}-${day}`;
+  }
+
+
   $(document).ready(function() {
     function getJudulSKT() {
       let tahun = document.getElementById('inputTahunGlobal').value || ".....";
@@ -306,14 +338,17 @@ function updateTahun() {
     formData.append('nomorSKT', fullSKT);
     formData.append('namaOrganisasi', $('#namaOrganisasi').val());
     formData.append('nomorPengajuan', $('#nomorPengajuan').val());
-    formData.append('tanggalPengajuan', $('#tanggalPengajuan').val());
-    formData.append('tanggalBerdiri', $('#tanggalBerdiri').val());
+    
+    formData.append('tanggalPengajuan', formatDateToIndo($('#tanggalPengajuan').val()));
+    formData.append('tanggalBerdiri', formatDateToIndo($('#tanggalBerdiri').val()));
     formData.append('alamatSekretariat', $('#alamatSekretariat').val());
-    formData.append('periode', $('#periode').val());
+    let thnMulai = $('#periodeMulai').val();
+    let thnSelesai = $('#periodeSelesai').val();
+    formData.append('periode', thnMulai + ' s/d ' + thnSelesai);
     formData.append('namaKetua', $('#namaKetua').val());
     formData.append('namaSekretaris', $('#namaSekretaris').val());
     formData.append('namaBendahara', $('#namaBendahara').val());
-    formData.append('tanggalPenerbitan', $('#tanggalPenerbitan').val());
+    formData.append('tanggalPenerbitan', formatDateToIndo($('#tanggalPenerbitan').val()));
     formData.append('namaKadis', $('#namaKadis').val());
     
     // NAMA VARIABEL TETAP 'golonganKadis' AGAR COCOK DENGAN GOOGLE APPS SCRIPT
@@ -367,11 +402,19 @@ function updateTahun() {
     }
     $('#nomorSKT').val(noTengah); 
     $('#namaOrganisasi').val(d.namaOrganisasi);
-    $('#nomorPengajuan').val(d.nomorPengajuan); $('#tanggalPengajuan').val(d.tanggalPengajuan); 
-    $('#tanggalBerdiri').val(d.tanggalBerdiri); $('#alamatSekretariat').val(d.alamatSekretariat); 
-    $('#periode').val(d.periode); $('#namaKetua').val(d.namaKetua); 
+    $('#nomorPengajuan').val(d.nomorPengajuan); $('#tanggalPengajuan').val(formatIndoToDate(d.tanggalPengajuan)); 
+    $('#tanggalBerdiri').val(formatIndoToDate(d.tanggalBerdiri)); $('#alamatSekretariat').val(d.alamatSekretariat); 
+    if (d.periode && d.periode.includes(' s/d ')) {
+        let rentangPeriode = d.periode.split(' s/d ');
+        $('#periodeMulai').val(rentangPeriode[0].trim());
+        $('#periodeSelesai').val(rentangPeriode[1].trim());
+    } else {
+        // Jika data lama tidak memakai format "s/d", masukkan langsung ke kotak mulai saja
+        $('#periodeMulai').val(d.periode);
+        $('#periodeSelesai').val('');
+    } $('#namaKetua').val(d.namaKetua); 
     $('#namaSekretaris').val(d.namaSekretaris); $('#namaBendahara').val(d.namaBendahara); 
-    $('#tanggalPenerbitan').val(d.tanggalPenerbitan);
+    $('#tanggalPenerbitan').val(formatIndoToDate(d.tanggalPenerbitan));
     $('#namaKadis').val(d.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
     $('#pangkatKadis').val(d.golonganKadis || "Pembina");
     $('#nipKadis').val(d.nipKadis || "19830415 200212 1 002");
