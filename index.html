@@ -69,7 +69,7 @@
               <label class="form-label text-muted small fw-bold">Nomor Pengajuan (Permohonan)</label>
               <div class="input-group shadow-sm">
                 <span class="input-group-text bg-light"><i class="fa-solid fa-hashtag text-muted"></i></span>
-                <input type="text" class="form-control" id="nomorPengajuan" placeholder="Misal: 003/KOS-AKM/III/2024" required>
+                <input type="text" class="form-control" id="nomorPengajuan" placeholder="Bisa diisi menyusul nanti...">
               </div>
             </div>
             <div class="col-md-6">
@@ -178,6 +178,10 @@
       <h4 class="m-0"><i class="fa-solid fa-server text-primary"></i> Database Rekap SKT <span id="displayTahun" class="badge bg-primary fs-5 ms-2">2024</span></h4>
       
       <div class="d-flex flex-wrap gap-3">
+        <button class="btn btn-warning shadow-sm fw-bold d-flex align-items-center" onclick="bukaModalBulk()" title="Input Nomor Pengajuan Berdasarkan Rentang Tanggal">
+          <i class="fa-solid fa-list-ol me-2"></i> Input Massal No. Pengajuan
+        </button>
+
         <button class="btn btn-danger shadow-sm fw-bold d-flex align-items-center" onclick="cetakMassal()" title="Cetak Semua SKT yang Tampil di Tabel">
           <i class="fa-solid fa-print me-2"></i> Cetak Massal SKT
         </button>
@@ -225,6 +229,61 @@
 
 </div>
 
+<div class="modal fade" id="bulkModal" data-bs-backdrop="static" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content glass-card border-0">
+      <div class="modal-header border-0">
+        <h5 class="fw-bold text-warning mb-0"><i class="fa-solid fa-list-ol"></i> Input Massal Nomor Pengajuan Berdasarkan Tanggal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3 mb-4 bg-light p-3 rounded shadow-sm">
+          <div class="col-md-4">
+            <label class="form-label text-muted small fw-bold">Dari Tanggal (Pengajuan)</label>
+            <input type="date" id="bulkDateStart" class="form-control fw-bold text-primary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small fw-bold">Sampai Tanggal (Pengajuan)</label>
+            <input type="date" id="bulkDateEnd" class="form-control fw-bold text-primary">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-primary w-100 fw-bold shadow-sm" onclick="loadBulkData()"><i class="fa-solid fa-search"></i> Tampilkan Organisasi</button>
+          </div>
+        </div>
+
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-bordered mb-0 align-middle">
+            <thead class="bg-secondary text-white">
+              <tr>
+                <th width="5%" class="text-center">No</th>
+                <th width="30%">Nama Organisasi</th>
+                <th width="15%">Tgl Pengajuan</th>
+                <th width="25%">Isi Nomor Pengajuan</th>
+                <th width="25%">Status Server</th>
+              </tr>
+            </thead>
+            <tbody id="bulkTableBody">
+              <tr><td colspan="5" class="text-center py-4 text-muted">Pilih rentang tanggal di atas dan klik "Tampilkan Organisasi"</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div id="bulkProgressContainer" class="d-none mt-4">
+          <p id="bulkProgressText" class="fw-bold text-primary mb-2">Menyimpan data ke server...</p>
+          <div class="progress shadow-sm" style="height: 20px; border-radius: 10px;">
+            <div id="bulkProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%;">0%</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Tutup / Batal</button>
+        <button type="button" id="btnSaveBulk" class="btn btn-success px-5 fw-bold d-none shadow-sm" onclick="saveBulkData()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Semua Perubahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="pdfModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content glass-card">
@@ -253,9 +312,7 @@
           <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger fw-bold" style="width: 0%;">0%</div>
         </div>
         <p id="progressText" class="text-muted fw-bold">Menyiapkan data...</p>
-        
         <div id="massalResult" class="d-none mt-4 text-start shadow-sm rounded p-2 bg-light" style="max-height: 250px; overflow-y: auto;"></div>
-        
         <button id="btnTutupMassal" class="btn btn-secondary mt-4 d-none w-100 fw-bold py-2" data-bs-dismiss="modal" onclick="syncWithServer()"><i class="fa-solid fa-check"></i> Selesai & Refresh Data</button>
       </div>
     </div>
@@ -277,6 +334,7 @@
 <script>
   let cloudData = [];
   let table;
+  let bulkDataCache = []; // Variabel khusus untuk fitur input massal
   
   // MASUKKAN URL API GOOGLE ANDA DI SINI
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
@@ -410,21 +468,18 @@
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
     let min = $('#filterMulai').val(); // format: YYYY-MM-DD
     let max = $('#filterSelesai').val(); // format: YYYY-MM-DD
-    let dateStringIndo = data[3] || ""; // Ambil teks dari kolom Tanggal Pengajuan (Index 3)
+    let dateStringIndo = data[3] || ""; 
 
     if (!min && !max) {
-      return true; // Jika input kosong, tampilkan semua baris
+      return true; 
     }
 
-    // Konversi tanggal bahasa Indo di tabel kembali ke format standar komputer (YYYY-MM-DD)
     let dateValue = formatIndoToDate(dateStringIndo);
 
-    // Jika format tanggal di tabel tidak dikenali, lewati saja
     if (!dateValue || dateValue === dateStringIndo) {
        return true; 
     }
 
-    // Logika pemfilteran rentang tanggal
     if (min && !max) {
       return dateValue >= min;
     } else if (!min && max) {
@@ -436,13 +491,13 @@
   });
 
   function applyFilterTanggal() {
-    table.draw(); // Panggil render ulang tabel untuk memicu ekstensi pencarian di atas
+    table.draw(); 
   }
 
   function resetFilterTanggal() {
     $('#filterMulai').val('');
     $('#filterSelesai').val('');
-    table.draw(); // Render ulang setelah input dikosongkan
+    table.draw(); 
   }
 
   function updateTahun() {
@@ -481,7 +536,7 @@
     
     formData.append('nomorSKT', fullSKT);
     formData.append('namaOrganisasi', $('#namaOrganisasi').val());
-    formData.append('nomorPengajuan', $('#nomorPengajuan').val());
+    formData.append('nomorPengajuan', $('#nomorPengajuan').val()); // Bisa bernilai kosong
     
     formData.append('tanggalPengajuan', formatDateToIndo($('#tanggalPengajuan').val()));
     formData.append('tanggalBerdiri', formatDateToIndo($('#tanggalBerdiri').val()));
@@ -531,10 +586,12 @@
       let tglPengajuanTampil = convertToLongIndoDate(item.tanggalPengajuan);
       let tglPenerbitanTampil = convertToLongIndoDate(item.tanggalPenerbitan);
 
+      let tampilanNoPengajuan = item.nomorPengajuan ? item.nomorPengajuan : '<span class="badge bg-warning text-dark"><i class="fa-solid fa-clock"></i> Belum Diisi</span>';
+
       table.row.add([
         index + 1, 
         item.namaOrganisasi, 
-        item.nomorPengajuan, 
+        tampilanNoPengajuan, 
         tglPengajuanTampil,     
         tglBerdiriTampil,       
         item.alamatSekretariat, 
@@ -593,6 +650,152 @@
     }
   }
 
+  // ==========================================
+  // FITUR INPUT MASSAL NOMOR PENGAJUAN
+  // ==========================================
+  function bukaModalBulk() {
+    $('#bulkDateStart').val('');
+    $('#bulkDateEnd').val('');
+    $('#bulkTableBody').html('<tr><td colspan="5" class="text-center py-4 text-muted">Pilih rentang tanggal di atas dan klik "Tampilkan Organisasi"</td></tr>');
+    $('#btnSaveBulk').addClass('d-none');
+    $('#bulkProgressContainer').addClass('d-none');
+    var modal = new bootstrap.Modal(document.getElementById('bulkModal'));
+    modal.show();
+  }
+
+  function loadBulkData() {
+    let start = $('#bulkDateStart').val();
+    let end = $('#bulkDateEnd').val();
+    
+    if (!start || !end) {
+      alert("Silakan isi Dari Tanggal dan Sampai Tanggal terlebih dahulu.");
+      return;
+    }
+
+    let tbody = $('#bulkTableBody');
+    tbody.html('<tr><td colspan="5" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-primary"></i> Memuat data dari database...</td></tr>');
+    
+    bulkDataCache = [];
+    let html = '';
+    let count = 1;
+
+    // Filter berdasarkan rentang tanggal
+    cloudData.forEach((item) => {
+      let dateValue = formatIndoToDate(item.tanggalPengajuan);
+      if (dateValue && dateValue >= start && dateValue <= end) {
+        bulkDataCache.push(item);
+        let currentNomor = item.nomorPengajuan ? item.nomorPengajuan : '';
+        html += `
+          <tr id="bulkRow_${item.rowId}">
+            <td class="text-center fw-bold">${count++}</td>
+            <td class="fw-bold text-primary">${item.namaOrganisasi}</td>
+            <td class="small">${convertToLongIndoDate(item.tanggalPengajuan)}</td>
+            <td>
+              <input type="text" class="form-control border-primary bulk-input-no" data-rowid="${item.rowId}" value="${currentNomor}" placeholder="Ketik No. Pengajuan disini...">
+            </td>
+            <td class="bulk-status text-muted small"><i class="fa-solid fa-minus"></i> Menunggu...</td>
+          </tr>
+        `;
+      }
+    });
+
+    if (bulkDataCache.length > 0) {
+      tbody.html(html);
+      $('#btnSaveBulk').removeClass('d-none');
+    } else {
+      tbody.html('<tr><td colspan="5" class="text-center py-4 text-danger fw-bold"><i class="fa-solid fa-circle-exclamation"></i> Tidak ada data pada rentang tanggal tersebut.</td></tr>');
+      $('#btnSaveBulk').addClass('d-none');
+    }
+  }
+
+  async function saveBulkData() {
+    let inputs = $('.bulk-input-no');
+    let itemsToUpdate = [];
+
+    // Deteksi hanya baris yang nomor pengajuannya berubah/diisi
+    inputs.each(function() {
+      let rowId = $(this).data('rowid');
+      let newVal = $(this).val().trim();
+      let originalItem = bulkDataCache.find(x => x.rowId === rowId);
+      
+      let originalVal = originalItem.nomorPengajuan ? originalItem.nomorPengajuan.trim() : "";
+
+      if (originalItem && originalVal !== newVal) {
+        itemsToUpdate.push({
+          rowId: rowId,
+          newNomor: newVal,
+          originalData: originalItem
+        });
+      }
+    });
+
+    if (itemsToUpdate.length === 0) {
+      alert("Tidak ada perubahan Nomor Pengajuan yang terdeteksi untuk disimpan.");
+      return;
+    }
+
+    if (!confirm(`Ada ${itemsToUpdate.length} data organisasi yang akan disimpan ke server. Lanjutkan?`)) return;
+
+    $('#btnSaveBulk').prop('disabled', true);
+    $('.btn-close').prop('disabled', true);
+    $('#bulkProgressContainer').removeClass('d-none');
+    $('.bulk-input-no').prop('disabled', true);
+    
+    let successCount = 0;
+
+    for (let i = 0; i < itemsToUpdate.length; i++) {
+      let updateItem = itemsToUpdate[i];
+      let targetData = updateItem.originalData;
+      
+      $(`#bulkRow_${updateItem.rowId} .bulk-status`).html('<span class="text-warning fw-bold"><i class="fa-solid fa-spinner fa-spin"></i> Sedang Menyimpan...</span>');
+
+      // Rekonstruksi data utuh untuk baris ini agar data lain tidak hilang
+      let formData = new FormData();
+      formData.append('action', 'editData');
+      formData.append('rowId', targetData.rowId);
+      
+      formData.append('nomorSKT', targetData.nomorSKT);
+      formData.append('namaOrganisasi', targetData.namaOrganisasi);
+      formData.append('nomorPengajuan', updateItem.newNomor); // MASUKKAN NOMOR BARU
+      formData.append('tanggalPengajuan', targetData.tanggalPengajuan);
+      formData.append('tanggalBerdiri', targetData.tanggalBerdiri);
+      formData.append('alamatSekretariat', targetData.alamatSekretariat);
+      formData.append('periode', targetData.periode);
+      formData.append('namaKetua', targetData.namaKetua);
+      formData.append('namaSekretaris', targetData.namaSekretaris);
+      formData.append('namaBendahara', targetData.namaBendahara);
+      formData.append('tanggalPenerbitan', targetData.tanggalPenerbitan);
+      formData.append('namaKadis', targetData.namaKadis || "ACHMAD MUGIYONO, S.STP., MM.");
+      formData.append('golonganKadis', targetData.pangkat || "Pembina");
+      formData.append('nipKadis', targetData.nipKadis || "19830415 200212 1 002");
+
+      try {
+        let response = await fetch(scriptURL, { method: 'POST', body: formData });
+        let result = await response.json();
+        if (result.result === 'success') {
+          $(`#bulkRow_${updateItem.rowId} .bulk-status`).html('<span class="text-success fw-bold"><i class="fa-solid fa-check"></i> Tersimpan</span>');
+          successCount++;
+          targetData.nomorPengajuan = updateItem.newNomor; 
+        } else {
+          $(`#bulkRow_${updateItem.rowId} .bulk-status`).html(`<span class="text-danger fw-bold"><i class="fa-solid fa-xmark"></i> Gagal Server</span>`);
+        }
+      } catch (e) {
+        $(`#bulkRow_${updateItem.rowId} .bulk-status`).html('<span class="text-danger fw-bold"><i class="fa-solid fa-wifi"></i> Gagal Jaringan</span>');
+      }
+
+      let percent = Math.round(((i + 1) / itemsToUpdate.length) * 100);
+      $('#bulkProgressBar').css('width', percent + '%').text(percent + '%');
+      $('#bulkProgressText').text(`Memproses penyimpanan baris ${i + 1} dari ${itemsToUpdate.length}...`);
+    }
+
+    $('#bulkProgressText').text(`Proses Selesai! Berhasil menyimpan ${successCount} dari ${itemsToUpdate.length} pembaruan.`);
+    $('#btnSaveBulk').prop('disabled', false).html('<i class="fa-solid fa-check-double"></i> Refresh Data & Tutup').attr('onclick', 'syncWithServer(); $("#bulkModal").modal("hide");');
+    $('.btn-close').prop('disabled', false);
+  }
+
+  // ==========================================
+  // FITUR CETAK MASSAL
+  // ==========================================
   function generateSKT(index) {
     let targetData = cloudData[index];
     let formData = new FormData();
