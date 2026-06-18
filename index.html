@@ -229,6 +229,7 @@
 
 </div>
 
+<!-- Bagian Modal dibiarkan sama -->
 <div class="modal fade" id="bulkModal" data-bs-backdrop="static" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content glass-card border-0">
@@ -334,14 +335,11 @@
 <script>
   let cloudData = [];
   let table;
-  let bulkDataCache = []; // Variabel khusus untuk fitur input massal
+  let bulkDataCache = []; 
   
   // MASUKKAN URL API GOOGLE ANDA DI SINI
   const scriptURL = 'https://script.google.com/macros/s/AKfycbxJ2ZcmUWN-sGAQhHy0sGsFp9vgC36OnmUpTVBk14kTHzWQM0AREWdJoCeJ5P8vt5ygYQ/exec'; 
 
-  // ==========================================
-  // KUMPULAN FUNGSI BANTUAN TANGGAL
-  // ==========================================
   const namaBulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
   function convertToLongIndoDate(dateStr) {
@@ -429,13 +427,62 @@
       return 'REGISTER SURAT KETERANGAN TERDAFTAR (SKT) ' + tahun;
     }
 
+    // ==========================================
+    // PERBAIKAN: MEMAKSA EXPORT/PRINT MEMBACA ANGKA DI LAYAR
+    // ==========================================
+    let opsiEkspor = {
+      columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      modifier: { search: 'applied' },
+      format: {
+        body: function (data, row, column, node) {
+          // Jika kolom ke-0 (nomor), ambil teks yang tampil di dalam HTML-nya
+          if (column === 0) {
+             return $(node).text(); 
+          }
+          return data;
+        }
+      }
+    };
+
     table = $('#rekapTable').DataTable({
       dom: 'Bfrtip',
       scrollX: true, 
       buttons: [
-        { extend: 'excelHtml5', className: 'btn btn-success btn-sm', text: '<i class="fa-solid fa-file-excel"></i> Export Excel', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } } },
-        { extend: 'pdfHtml5', orientation: 'landscape', pageSize: 'LEGAL', className: 'btn btn-danger btn-sm', text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', title: getJudulSKT, filename: getJudulSKT, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } }, customize: function(doc){ doc.content[0].text = getJudulSKT(); doc.content[0].alignment = 'center'; doc.content[0].fontSize = 14; doc.content[0].bold = true; doc.content[0].margin = [0, 0, 0, 15]; } },
-        { extend: 'print', className: 'btn btn-secondary btn-sm', text: '<i class="fa-solid fa-print"></i> Print Tabel', title: '', messageTop: function() { return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; }, exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], modifier: { search: 'applied' } } }
+        { 
+          extend: 'excelHtml5', 
+          className: 'btn btn-success btn-sm', 
+          text: '<i class="fa-solid fa-file-excel"></i> Export Excel', 
+          title: getJudulSKT, 
+          filename: getJudulSKT, 
+          exportOptions: opsiEkspor 
+        },
+        { 
+          extend: 'pdfHtml5', 
+          orientation: 'landscape', 
+          pageSize: 'LEGAL', 
+          className: 'btn btn-danger btn-sm', 
+          text: '<i class="fa-solid fa-file-pdf"></i> Export PDF', 
+          title: getJudulSKT, 
+          filename: getJudulSKT, 
+          exportOptions: opsiEkspor, 
+          customize: function(doc){ 
+            doc.content[0].text = getJudulSKT(); 
+            doc.content[0].alignment = 'center'; 
+            doc.content[0].fontSize = 14; 
+            doc.content[0].bold = true; 
+            doc.content[0].margin = [0, 0, 0, 15]; 
+          } 
+        },
+        { 
+          extend: 'print', 
+          className: 'btn btn-secondary btn-sm', 
+          text: '<i class="fa-solid fa-print"></i> Print Tabel', 
+          title: '', 
+          messageTop: function() { 
+            return '<h4 class="text-center fw-bold text-dark mb-4 mt-3">' + getJudulSKT() + '</h4>'; 
+          }, 
+          exportOptions: opsiEkspor 
+        }
       ],
       language: { search: "Cari Data:", zeroRecords: "Data tidak ditemukan atau sedang disinkronkan..." }
     });
@@ -464,10 +511,9 @@
     table.column(10).search(selectedYear).draw(); 
   }
 
-  // Ekstensi pencarian kustom DataTables untuk Filter Rentang Tanggal
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-    let min = $('#filterMulai').val(); // format: YYYY-MM-DD
-    let max = $('#filterSelesai').val(); // format: YYYY-MM-DD
+    let min = $('#filterMulai').val(); 
+    let max = $('#filterSelesai').val(); 
     let dateStringIndo = data[3] || ""; 
 
     if (!min && !max) {
@@ -536,7 +582,7 @@
     
     formData.append('nomorSKT', fullSKT);
     formData.append('namaOrganisasi', $('#namaOrganisasi').val());
-    formData.append('nomorPengajuan', $('#nomorPengajuan').val()); // Bisa bernilai kosong
+    formData.append('nomorPengajuan', $('#nomorPengajuan').val());
     
     formData.append('tanggalPengajuan', formatDateToIndo($('#tanggalPengajuan').val()));
     formData.append('tanggalBerdiri', formatDateToIndo($('#tanggalBerdiri').val()));
@@ -650,9 +696,6 @@
     }
   }
 
-  // ==========================================
-  // FITUR INPUT MASSAL NOMOR PENGAJUAN
-  // ==========================================
   function bukaModalBulk() {
     $('#bulkDateStart').val('');
     $('#bulkDateEnd').val('');
@@ -679,7 +722,6 @@
     let html = '';
     let count = 1;
 
-    // Filter berdasarkan rentang tanggal
     cloudData.forEach((item) => {
       let dateValue = formatIndoToDate(item.tanggalPengajuan);
       if (dateValue && dateValue >= start && dateValue <= end) {
@@ -712,7 +754,6 @@
     let inputs = $('.bulk-input-no');
     let itemsToUpdate = [];
 
-    // Deteksi hanya baris yang nomor pengajuannya berubah/diisi
     inputs.each(function() {
       let rowId = $(this).data('rowid');
       let newVal = $(this).val().trim();
@@ -749,14 +790,12 @@
       
       $(`#bulkRow_${updateItem.rowId} .bulk-status`).html('<span class="text-warning fw-bold"><i class="fa-solid fa-spinner fa-spin"></i> Sedang Menyimpan...</span>');
 
-      // Rekonstruksi data utuh untuk baris ini agar data lain tidak hilang
       let formData = new FormData();
       formData.append('action', 'editData');
       formData.append('rowId', targetData.rowId);
-      
       formData.append('nomorSKT', targetData.nomorSKT);
       formData.append('namaOrganisasi', targetData.namaOrganisasi);
-      formData.append('nomorPengajuan', updateItem.newNomor); // MASUKKAN NOMOR BARU
+      formData.append('nomorPengajuan', updateItem.newNomor); 
       formData.append('tanggalPengajuan', targetData.tanggalPengajuan);
       formData.append('tanggalBerdiri', targetData.tanggalBerdiri);
       formData.append('alamatSekretariat', targetData.alamatSekretariat);
@@ -793,9 +832,6 @@
     $('.btn-close').prop('disabled', false);
   }
 
-  // ==========================================
-  // FITUR CETAK MASSAL
-  // ==========================================
   function generateSKT(index) {
     let targetData = cloudData[index];
     let formData = new FormData();
@@ -900,12 +936,8 @@
     $('#btnTutupMassal').removeClass('d-none');
   }
 
-  // ==========================================
-  // FITUR PENOMORAN OTOMATIS SAAT FILTER (TAMBAHAN BARU)
-  // ==========================================
   $(document).ready(function() {
       $(document).on('draw.dt', function (e, settings) {
-          // Hanya berjalan di tabel Rekap Database
           if (settings.nTable.id === 'rekapTable') {
               var api = new $.fn.dataTable.Api(settings);
               api.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
